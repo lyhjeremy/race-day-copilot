@@ -1,0 +1,21 @@
+{
+  "race_name": "Out And Back Climb",
+  "distance_km": 42.2,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 21.1,
+      "trend": "up",
+      "severity": "moderate",
+      "note": null
+    },
+    {
+      "km_start": 21.1,
+      "km_end": 42.2,
+      "trend": "down",
+      "severity": "moderate",
+      "note": null
+    }
+  ],
+  "source_confidence": 1.0
+}

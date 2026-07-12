@@ -1,0 +1,35 @@
+{
+  "race_name": "Hilly Boston Like",
+  "distance_km": 42.2,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 16.0,
+      "trend": "down",
+      "severity": "gentle",
+      "note": null
+    },
+    {
+      "km_start": 16.0,
+      "km_end": 26.0,
+      "trend": "flat",
+      "severity": "gentle",
+      "note": null
+    },
+    {
+      "km_start": 26.0,
+      "km_end": 34.0,
+      "trend": "up",
+      "severity": "steep",
+      "note": "Newton hills"
+    },
+    {
+      "km_start": 34.0,
+      "km_end": 42.2,
+      "trend": "down",
+      "severity": "moderate",
+      "note": null
+    }
+  ],
+  "source_confidence": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "race_name": "Half Marathon Flat",
+  "distance_km": 21.1,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 21.1,
+      "trend": "flat",
+      "severity": "gentle",
+      "note": null
+    }
+  ],
+  "source_confidence": 1.0
+}

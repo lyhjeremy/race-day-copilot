@@ -1,0 +1,35 @@
+{
+  "race_name": "Rolling",
+  "distance_km": 42.2,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 10.0,
+      "trend": "up",
+      "severity": "gentle",
+      "note": null
+    },
+    {
+      "km_start": 10.0,
+      "km_end": 20.0,
+      "trend": "down",
+      "severity": "gentle",
+      "note": null
+    },
+    {
+      "km_start": 20.0,
+      "km_end": 30.0,
+      "trend": "up",
+      "severity": "moderate",
+      "note": null
+    },
+    {
+      "km_start": 30.0,
+      "km_end": 42.2,
+      "trend": "down",
+      "severity": "gentle",
+      "note": null
+    }
+  ],
+  "source_confidence": 1.0
+}

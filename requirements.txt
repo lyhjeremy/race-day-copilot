@@ -1,0 +1,13 @@
+gradio
+pydantic>=2.0
+numpy
+pytesseract
+sentence-transformers
+faster-whisper
+edge-tts
+google-genai
+anthropic
+Pillow
+mlx-lm
+matplotlib
+pytest

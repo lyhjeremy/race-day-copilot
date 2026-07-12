@@ -1,0 +1,14 @@
+{
+  "race_name": "Flat Berlin Like",
+  "distance_km": 42.2,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 42.2,
+      "trend": "flat",
+      "severity": "gentle",
+      "note": "Flat, fast course"
+    }
+  ],
+  "source_confidence": 1.0
+}

@@ -1,0 +1,14 @@
+{
+  "race_name": "Net Downhill",
+  "distance_km": 42.2,
+  "segments": [
+    {
+      "km_start": 0.0,
+      "km_end": 42.2,
+      "trend": "down",
+      "severity": "moderate",
+      "note": "Net downhill point-to-point"
+    }
+  ],
+  "source_confidence": 1.0
+}
