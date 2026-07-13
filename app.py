@@ -59,7 +59,24 @@ def extract_course(image) -> tuple[CourseProfile | None, str, list[list]]:
         return None, f"⚠ {result.user_message}", []
 
     rows = [[s.km_start, s.km_end, s.trend, s.severity, s.note or ""] for s in result.segments]
-    return result, f"✓ Extracted: {result.race_name or 'course'}, {result.distance_km}km (confidence {result.source_confidence:.2f}). Review/edit the segments below before continuing.", rows
+    # source_confidence is the schema's own self-reported read quality --
+    # distinct from the domain-gate check above (which only confirms "this is
+    # a course chart", not "these specific segments are accurate"). Local
+    # OCR+text-only extraction genuinely cannot read a curve's shape (verified
+    # live: a hilly course chart image produced a plausible-looking but
+    # basically guessed segment list at confidence 0.32, going only off the
+    # chart's title text) -- so a low score here isn't a rare edge case for
+    # this project, it's the common case, and needs to read as a real warning,
+    # not a small number tucked into a sentence.
+    if result.source_confidence < 0.5:
+        status = (f"⚠ Low-confidence read ({result.source_confidence:.2f}) for {result.race_name or 'this course'}, "
+                  f"{result.distance_km}km — local vision can't reliably read a chart's shape, only its text "
+                  f"labels. The segments below are a rough guess; please correct them (or use an example course) "
+                  f"before building a plan.")
+    else:
+        status = (f"✓ Extracted: {result.race_name or 'course'}, {result.distance_km}km "
+                  f"(confidence {result.source_confidence:.2f}). Review/edit the segments below before continuing.")
+    return result, status, rows
 
 
 def load_example(name: str):
