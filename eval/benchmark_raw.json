@@ -1,0 +1,58 @@
+{
+  "held_out_n": 70,
+  "systems": {
+    "base": {
+      "system": "base",
+      "n": 70,
+      "parse_success_rate": 0.557,
+      "verifier_pass_rate": 0.0,
+      "violation_rates": {
+        "coverage": 0.557,
+        "parse": 0.443
+      },
+      "mean_latency_s": 17.5
+    },
+    "lora": {
+      "system": "lora",
+      "n": 70,
+      "parse_success_rate": 0.957,
+      "verifier_pass_rate": 0.0,
+      "violation_rates": {
+        "sum": 0.829,
+        "fade": 0.914,
+        "plausibility": 0.014,
+        "parse": 0.043,
+        "heat": 0.043,
+        "coverage": 0.029
+      },
+      "mean_latency_s": 53.66
+    },
+    "teacher": {
+      "system": "teacher",
+      "n": 70,
+      "parse_success_rate": 0.9,
+      "verifier_pass_rate": 0.757,
+      "violation_rates": {
+        "parse": 0.1,
+        "sum": 0.029,
+        "fade": 0.057,
+        "citations": 0.086
+      },
+      "mean_latency_s": 157.68
+    }
+  },
+  "judge": {
+    "n_judged": 60,
+    "student_wins": 0,
+    "teacher_wins": 56,
+    "ties": 4,
+    "student_win_rate": 0.0,
+    "teacher_win_rate": 0.933,
+    "tie_rate": 0.067
+  },
+  "cost_per_1k_plans_usd": {
+    "base": 0.0,
+    "lora": 0.0,
+    "teacher": null
+  }
+}

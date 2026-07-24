@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "train": 1321,
+    "valid": 67,
+    "test": 70
+  },
+  "n_entities": {
+    "train": 1321,
+    "valid": 67,
+    "test": 70
+  },
+  "leakage_check": "passed",
+  "max_example_tokens": 4197,
+  "max_seq_length_budget": 4608
+}

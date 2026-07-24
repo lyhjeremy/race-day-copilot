@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Race Day Copilot — photograph a course map, get a verified pacing plan</title>
+<meta name="description" content="Photograph a race course map and get a km-by-km pacing plan checked against five deterministic rules before you ever see it — plus a locally fine-tuned model distilled to produce the same plans for free. No vision API key needed." />
+<style>
+  :root{--ink:#1a1a2e;--paper:#FBF8F1;--rule:#E5DFD0;--soft:#66604f;--gold:#D4A537;--wine:#7a1f2b}
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.7;font-size:18px}
+  .hero{width:100%;background:#1a1a2e;overflow:hidden}
+  .hero img{width:100%;display:block}
+  .container{max-width:820px;margin:0 auto;padding:38px 24px 80px}
+  .kicker{text-transform:uppercase;letter-spacing:.16em;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:var(--wine);font-weight:700;text-align:center;margin-bottom:12px}
+  h1{font-size:40px;line-height:1.16;text-align:center;margin:0 0 14px}
+  .lede{font-size:20px;color:#33403a;text-align:center;margin:0 auto 6px;max-width:680px}
+  .byline{color:var(--soft);font-style:italic;text-align:center;margin:18px 0 30px}
+  h2{font-size:26px;margin:50px 0 14px;border-bottom:1px solid var(--rule);padding-bottom:8px}
+  p{margin:0 0 16px} a{color:var(--wine)}
+  .features{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:26px 0}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:20px;font-family:'Helvetica Neue',Arial,sans-serif}
+  .card .ico{font-size:24px}.card h3{margin:8px 0 6px;font-size:18px}.card p{font-size:15px;color:#444;margin:0;line-height:1.6}
+  .steps{counter-reset:step;list-style:none;padding:0;margin:24px 0}
+  .steps li{position:relative;padding:12px 0 12px 54px;border-bottom:1px dashed var(--rule);font-family:'Helvetica Neue',Arial,sans-serif;font-size:16px}
+  .steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:10px;width:34px;height:34px;border-radius:50%;background:var(--wine);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .note{background:#fff;border:1px solid var(--rule);border-left:4px solid var(--wine);border-radius:8px;padding:14px 20px;font-size:14.5px;color:#444;font-family:'Helvetica Neue',Arial,sans-serif;margin:24px 0}
+  table{width:100%;border-collapse:collapse;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;margin:20px 0}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--rule);text-align:left}
+  th{color:var(--wine);font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  .btnrow{text-align:center;margin:40px 0 8px}
+  .btn{display:inline-block;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:600;text-decoration:none;padding:13px 24px;border-radius:8px;margin:6px}
+  .btn-solid{background:var(--wine);color:#fff}.btn-ghost{border:1px solid var(--wine);color:var(--wine)}
+  .footer{text-align:center;color:var(--soft);font-size:14px;margin-top:54px;font-family:'Helvetica Neue',Arial,sans-serif}
+  img.fig{max-width:100%;border:1px solid var(--rule);border-radius:8px}
+  @media(max-width:600px){h1{font-size:30px}.features{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero"><img src="assets/banner.png" alt="Race Day Copilot"/></div>
+<div class="container">
+  <p class="kicker">Verified pacing, not vibes</p>
+  <h1>Race Day Copilot</h1>
+  <p class="lede">Photograph a race course map — get a <strong>km-by-km pacing plan</strong> checked against five deterministic rules before it's ever shown to you, plus a <strong>locally fine-tuned model</strong> that produces the same plans for free.</p>
+  <p class="byline">By Jeremy Lee</p>
+
+  <h2>Why</h2>
+  <p>Ask a chatbot for a marathon pacing plan and you're trusting it to sum 42 split times correctly, reason about hills it can't see numerically, and not quietly hand you a negative-split strategy that almost nobody actually achieves. Race Day Copilot never trusts a plan on vibes: every plan is checked in plain code against five rules before you see it — coverage, arithmetic sum, per-km plausibility against the real course profile, fade direction, and a heat-adjustment formula derived from a real Boston Marathon finding.</p>
+
+  <div class="features">
+    <div class="card"><div class="ico">📷</div><h3>No vision API key</h3><p>Local OCR + Claude reads the course-map photo into a structured profile — refuses non-course photos.</p></div>
+    <div class="card"><div class="ico">✅</div><h3>Five deterministic checks</h3><p>Coverage, sum, plausibility, fade, and heat — every violation a plain-English sentence, checked before you ever see the plan.</p></div>
+    <div class="card"><div class="ico">🌡️</div><h3>Real heat-tax formula</h3><p>Heat adjustment derived from this portfolio's own Boston Marathon finding: ~1 min slower per °F on the field median.</p></div>
+    <div class="card"><div class="ico">🧠</div><h3>Locally fine-tuned</h3><p>A LoRA-tuned Qwen2.5-3B distills the same plans — runs on a laptop, $0 marginal cost.</p></div>
+  </div>
+
+  <h2>The fine-tune, honestly benchmarked</h2>
+  <p>Held out by scenario id (70 scenarios), zero-shot/no-retry, identical prompt for all three systems:</p>
+
+  <table>
+    <tr><th>System</th><th>Parse success</th><th>Verifier pass rate</th><th>Latency</th></tr>
+    <tr><td>Base Qwen2.5-3B (no fine-tune)</td><td>55.7%</td><td>0.0%</td><td>17.5s</td></tr>
+    <tr><td><strong>+ LoRA (this project)</strong></td><td><strong>95.7%</strong></td><td>0.0%*</td><td>53.7s</td></tr>
+    <tr><td>Claude (teacher, zero-shot)</td><td>90.0%</td><td><strong>75.7%</strong></td><td>157.7s</td></tr>
+  </table>
+
+  <div class="note">📊 <strong>*Not a failure story — read the per-check table.</strong> LoRA reaches near-parity with the teacher on coverage, hill plausibility, and the heat formula (all &lt;5% failure). The real gap is exact split-sum arithmetic (82.9% miss the 90s tolerance) and a self-consistency mismatch in the fade field — a genuine LLM arithmetic limitation, not a bug. Full breakdown in the <a href="writeup.md">writeup</a>.</div>
+
+  <div class="note">⚠️ <strong>This was the hardest fine-tune of five.</strong> Getting here took four training attempts across two days: a sequence-length miscalculation, a memory bug that faked being alive, two loss-divergence incidents, and a custom gradient-clipping training script built from scratch because <code>mlx_lm.lora</code>'s CLI has none — which still didn't fully eliminate the instability. The published model is the best checkpoint from ~400 iterations of confirmed-clean training, published deliberately rather than chasing a fifth attempt. The full story is in the <a href="writeup.md">writeup</a> — it's the most interesting part of this whole project.</div>
+
+  <p align="center"><img class="fig" src="eval/loss_curve.png" alt="Training loss curve" width="600"></p>
+
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li>Photograph a course map — local OCR + Claude extracts distance, hill segments, and a confidence score.</li>
+    <li>State a goal time, temperature, and experience level — retrieval pulls the 14 most relevant pacing-research knowledge cards.</li>
+    <li>Claude (or the local LoRA model) generates a km-by-km plan from the identical assembled prompt.</li>
+    <li>The plan is checked against five deterministic rules before you ever see it — a failure regenerates with the violation fed back as plain English.</li>
+  </ol>
+
+  <div class="note">🔒 Everything runs locally except the <code>claude -p</code> calls for course extraction and generation — no metered API, no vision API key. See the <a href="writeup.md">full writeup</a> for the complete training saga, including four real incidents and the two bugs found building the benchmark itself.</div>
+
+  <div class="btnrow">
+    <a class="btn btn-solid" href="https://github.com/lyhjeremy/race-day-copilot">View on GitHub</a>
+    <a class="btn btn-ghost" href="writeup.md">Read the full writeup</a>
+  </div>
+
+  <p class="footer">Part of a five-project series testing fine-tuning, guardrails, multimodal input, context engineering, and token optimization — the applied-AI-engineering half of Jeremy Lee's portfolio. See the <a href="https://github.com/lyhjeremy">full profile</a>.</p>
+</div>
+</body>
+</html>
