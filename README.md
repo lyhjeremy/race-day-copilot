@@ -20,6 +20,7 @@ the course profile, fade direction, and a heat-adjustment formula derived
 from a real Boston Marathon finding) before it's shown to you.
 
 > 🌐 **Overview:** https://lyhjeremy.github.io/race-day-copilot/
+> 📖 **Product overview:** https://lyhjeremy.github.io/race-day-copilot/overview/
 
 ## How it works
 
