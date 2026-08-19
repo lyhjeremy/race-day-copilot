@@ -1,10 +1,10 @@
 # The Heat Tax: How Temperature Slows Your Marathon
 > Source: Jeremy Lee's Boston Marathon weather analysis
 
-Heat is one of the most powerful and predictable forces acting on marathon times — and it is easy to underestimate on race morning.
+Heat is one of the most powerful and predictable forces acting on marathon times, and it is easy to underestimate on race morning.
 
 **What 14 years of Boston data reveal (weather-paired):**
-- Per-year median finish time versus race-day midday temperature correlates at **r=0.86** — a very strong relationship.
+- Per-year median finish time versus race-day midday temperature correlates at **r=0.86.** A very strong relationship.
 - The slope is approximately **1 minute slower per °F** of midday temperature.
 - Going from **50°F to 80°F** adds roughly **31 minutes** to the median finish time.
 

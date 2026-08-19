@@ -4,7 +4,7 @@
 The training is done; race week is about arriving fresh, calm, and prepared. The golden rule: **nothing new on race day.**
 
 **Race week:**
-- Prioritize **sleep** across the whole week — the night *before* often brings pre-race nerves, so bank rest earlier.
+- Prioritize **sleep** across the whole week. The night *before* often brings pre-race nerves, so bank rest earlier.
 - Follow your taper: low volume, a little sharpness.
 - Sort **logistics** in advance: travel, bib pickup, start corral, gear, weather forecast, and a pacing plan adjusted for conditions and course.
 - Carb-load and lower fiber in the final 1–3 days.

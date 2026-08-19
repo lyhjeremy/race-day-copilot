@@ -4,7 +4,9 @@
 
 # Race Day Copilot
 
-Photograph a race course map — get a verified, km-by-km pacing plan that
+Design and copy follow [these standards](https://github.com/lyhjeremy/lyhjeremy/blob/main/DESIGN_STANDARDS.md).
+
+Photograph a race course map: get a verified, km-by-km pacing plan that
 accounts for hills, heat, and realistic fade, plus a **locally fine-tuned
 model** distilled to produce the same plans without calling Claude.
 
@@ -19,8 +21,8 @@ deterministic rules (coverage, arithmetic sum, per-km plausibility vs.
 the course profile, fade direction, and a heat-adjustment formula derived
 from a real Boston Marathon finding) before it's shown to you.
 
-> 🌐 **Overview:** https://lyhjeremy.github.io/race-day-copilot/
-> 📖 **Product overview:** https://lyhjeremy.github.io/race-day-copilot/overview/
+> **Overview:** https://lyhjeremy.github.io/race-day-copilot/
+> **Product overview:** https://lyhjeremy.github.io/race-day-copilot/overview/
 
 ## How it works
 
@@ -31,11 +33,11 @@ from a real Boston Marathon finding) before it's shown to you.
 - **Vision, entirely local.** No Gemini/OpenAI vision key required:
   local OCR + `claude -p` (Claude Max subscription, no per-token cost)
   reads a course-map photo into a structured `CourseProfile` (distance,
-  hill segments, confidence) — refusing non-course photos.
+  hill segments, confidence), refusing non-course photos.
 - **Retrieval.** 14 knowledge cards (pacing research: negative-split
   rarity, hill-effort strategy, heat tax, hitting-the-wall decay) plus 4
   findings digests, embedded locally with `sentence-transformers`, packed
-  into the prompt by a priority-based `ContextBudgeter` — the exact same
+  into the prompt by a priority-based `ContextBudgeter`. The exact same
   prompt-assembly code is used for the Claude teacher and the local
   student, so neither ever gets a hint the other doesn't.
 - **Grounded, verified generation.** Every plan is checked by
@@ -60,15 +62,15 @@ Held-out benchmark (70 scenarios, split by scenario id, zero-shot/no-retry):
 | **+ LoRA (this project)** | **95.7%** | 0.0%* | 53.7s |
 | Claude (teacher, zero-shot) | 90.0% | **75.7%** | 157.7s |
 
-\* **Not a floor result — read the per-check breakdown.** LoRA achieves
+\* **Not a floor result, read the per-check breakdown.** LoRA achieves
 near-parity with the teacher on structure, coverage, hill plausibility,
 and the heat formula (all <5% failure). The real, well-understood
 remaining gap is **exact split-time arithmetic** (82.9% of plans miss the
 90-second sum tolerance) and a **self-consistency mismatch** in the
 model's own `fade_allowance_pct` field vs. what its own splits compute
-(91.4%) — a genuine LLM limitation with precise multi-step arithmetic,
+(91.4%). A genuine LLM limitation with precise multi-step arithmetic,
 not a bug. Full per-check table, judge results (teacher preferred in
-93.3% of 60 blind pairwise comparisons, LoRA 0%, 6.7% tie — consistent
+93.3% of 60 blind pairwise comparisons, LoRA 0%, 6.7% tie, consistent
 with the objective gap), and methodology in [`eval/benchmark.md`](eval/benchmark.md).
 
 **This was the hardest fine-tune of the whole 5-project build.** Getting
@@ -78,7 +80,7 @@ tokenizer, not guessed), a memory bug that silently produced fake
 `0.000`-loss "training" that looked alive but wasn't, two loss-divergence
 incidents (the second surviving longer after mitigation, but still
 recurring), and finally a **custom training script built from scratch**
-adding real gradient clipping — something `mlx_lm.lora`'s packaged CLI
+adding real gradient clipping, something `mlx_lm.lora`'s packaged CLI
 doesn't expose at all. Even that didn't fully eliminate the instability;
 the final published model is the best checkpoint from ~400 iterations of
 confirmed-clean training, stopped deliberately rather than chased
@@ -86,15 +88,15 @@ further. Full blow-by-blow in [`writeup.md`](writeup.md).
 
 ## Guardrails
 
-- **Deterministic verifier, not vibes** — 5 checks (coverage, sum, per-km
+- **Deterministic verifier, not vibes.** 5 checks (coverage, sum, per-km
   plausibility, fade, heat), every violation a human-readable sentence
   fed back into a bounded retry loop.
-- **Domain gate** — a non-course photo gets a friendly refusal, not a
+- **Domain gate.** A non-course photo gets a friendly refusal, not a
   hallucinated route.
-- **Identical prompt for teacher and student** — the benchmark compares
+- **Identical prompt for teacher and student.** The benchmark compares
   what each system brings on its own, no schema hint given to one and
   not the other.
-- **Context budget report** — every prompt's section-by-section token
+- **Context budget report.** Every prompt's section-by-section token
   allocation is inspectable (`ContextBudgeter.pack().report`).
 
 ## Files
@@ -126,10 +128,10 @@ bash training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-Ins
 python app.py
 ```
 
-No API key required — everything runs locally except a `claude -p` call
+No API key required, everything runs locally except a `claude -p` call
 for course-photo extraction and generation (uses your Claude
 subscription, not a metered API).
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT, see [`LICENSE`](LICENSE).

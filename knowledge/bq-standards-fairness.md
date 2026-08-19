@@ -4,9 +4,9 @@
 Boston Marathon qualifying (BQ) times are set by age and gender bracket. A common question: are these standards fair across groups? The analysis of 22 age-gender brackets gives a nuanced answer.
 
 **The findings:**
-- **No mean-level gender bias** — on average, men's and women's standards are comparably difficult.
+- **No mean-level gender bias.** On average, men's and women's standards are comparably difficult.
 - But **women's brackets are 3–4× more variable in difficulty** than men's. How hard your BQ is depends heavily on *which* bracket you fall into.
-- The **W80+ bracket is roughly 57 minutes too strict** — a clear outlier that is far harder to achieve than its counterparts.
+- The **W80+ bracket is roughly 57 minutes too strict.** A clear outlier that is far harder to achieve than its counterparts.
 - The **2026 tightening** of standards addressed **demand** (too many qualifiers for available slots), **not fairness** across brackets.
 
 **What this means for you:**

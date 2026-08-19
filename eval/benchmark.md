@@ -1,4 +1,4 @@
-# Race Day Copilot — 3-way benchmark
+# Race Day Copilot: 3-way benchmark
 
 Held-out test set: **70 scenarios** (split by scenario id, seed=42, 90/5/5).
 

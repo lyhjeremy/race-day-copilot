@@ -1,7 +1,7 @@
 # The Reality of Negative Splits
 > Source: Jeremy Lee's Boston Marathon pacing-decay analysis
 
-A negative split — running the second half of the marathon faster than the first — is widely praised as the ideal race strategy. But the data show it is extraordinarily rare in practice.
+A negative split, running the second half of the marathon faster than the first. Is widely praised as the ideal race strategy. But the data show it is extraordinarily rare in practice.
 
 **What the Boston 2014 data reveal (31,912 finishers):**
 - Only **2.5%** ran a true negative split.
@@ -15,7 +15,7 @@ A negative split — running the second half of the marathon faster than the fir
 
 **What this means for you:**
 - The near-universal error is **going out too fast**. Positive splits dominate because runners bank time early and pay for it late.
-- Do not chase a heroic negative split. For almost everyone, the realistic and optimal target is an **even split** — running the two halves at close to the same pace.
+- Do not chase a heroic negative split. For almost everyone, the realistic and optimal target is an **even split.** Running the two halves at close to the same pace.
 - The faster and more experienced you are, the more evenly you will naturally pace. If you are a mid-pack or first-time marathoner, assume your instinct to push early is a trap.
 
 **Actionable takeaway:** Set a goal pace you can hold evenly, and deliberately run the first 5–10 km slightly slower than goal to bank fitness, not time. Discipline in the opening miles is the single biggest lever most amateurs have.

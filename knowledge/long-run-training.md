@@ -15,8 +15,8 @@ The long run is the cornerstone of marathon training. It builds the aerobic engi
 - Most long runs are run at an **easy, conversational pace**; some plans add segments at goal marathon pace to rehearse race effort.
 
 **Guidelines:**
-- Prioritize consistency over any single heroic run — the cumulative effect matters most.
+- Prioritize consistency over any single heroic run. The cumulative effect matters most.
 - Don't let the long run become so long or fast that it compromises the rest of the week's training or recovery.
 - Practice race-day logistics: fueling timing, hydration, shoes, and pacing.
 
-**Actionable takeaway:** Build your long run steadily with step-back weeks, keep most of it easy, use it to rehearse fueling and race-pace segments, and let consistency — not one huge effort — build your marathon endurance.
+**Actionable takeaway:** Build your long run steadily with step-back weeks, keep most of it easy, use it to rehearse fueling and race-pace segments, and let consistency, not one huge effort, build your marathon endurance.

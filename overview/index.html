@@ -3,28 +3,31 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Race Day Copilot — a pacing plan that gets checked before you see it</title>
+<title>Race Day Copilot: a pacing plan that gets checked before you see it</title>
 <meta name="description" content="Photograph a course map, get a verified km-by-km pacing plan. Five deterministic rules check every plan before it is shown. Plus a locally fine-tuned model, and an honest account of the four training attempts it took." />
-<meta name="theme-color" content="#FBF8F1" />
+<meta name="theme-color" content="#EDEDE7" />
 <meta property="og:title" content="Race Day Copilot" />
 <meta property="og:description" content="Every plan checked in plain code against five rules before display. And the fine-tune that took four attempts and still lost on arithmetic." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://lyhjeremy.github.io/race-day-copilot/overview/" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
 <style>
+@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-400.woff2")format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-600.woff2")format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-400.woff2")format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-600.woff2")format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("../fonts/IBMPlexMono-400.woff2")format("woff2");font-weight:400;font-display:swap}
+
   :root {
-    --paper: #FBF8F1;
-    --card: #FFFFFF;
-    --plate: #FFFFFF;
-    --ink: #1a1a2e;
+    --paper: #EDEDE7;
+    --card: #F5F5F0;
+    --plate: #F5F5F0;
+    --ink: #1C1E1B;
     --ink2: #3d3d55;
-    --muted: #6B7280;
-    --rule: #E5DCC7;
-    --accent: #0E7490;
+    --muted: #52564E;
+    --rule: #C6C7BF;
+    --accent: #8C3A1E;
     --accent2: #C2410C;
-    --link: #7a1f2b;
+    --link: #2C5852;
     --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
     --sans: 'Source Sans 3', -apple-system, system-ui, sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
@@ -57,11 +60,11 @@
   }
   img { max-width: 100%; height: auto; display: block; }
   a { color: var(--link); }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 0; }
   strong { font-weight: 700; color: var(--ink); }
   code { font-family: var(--mono); font-size: .86em;
          background: color-mix(in srgb, var(--ink) 7%, transparent);
-         padding: .12em .38em; border-radius: 4px; }
+         padding: .12em .38em; border-radius: 0; }
   .wrap { width: var(--col); margin: 0 auto; }
 
   .eyebrow { font-family: var(--mono); font-weight: 600; font-size: 11.5px;
@@ -71,7 +74,7 @@
   .masthead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding: 30px 0 0; }
   .logo { font-family: var(--sans); font-weight: 800; font-size: 21px;
           letter-spacing: -.02em; display: flex; align-items: center; gap: 9px; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex: none; }
+  .dot { width: 9px; height: 9px; border-radius: 0; background: var(--accent); flex: none; }
   .tagline { font-size: 15px; color: var(--ink2); font-family: var(--sans); }
 
   .hero { padding: 44px 0 54px; }
@@ -82,9 +85,9 @@
   .hero-sub { margin: 24px 0 0; font-size: 1.06em; color: var(--ink2); max-width: 60ch; }
 
   .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; align-items: center; }
-  .btn { display: inline-block; padding: 13px 26px; border-radius: 8px;
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 0;
          font-family: var(--sans); font-weight: 700; font-size: 16px;
-         text-decoration: none; border: 1px solid var(--ink); transition: transform .15s ease; }
+         text-decoration: none; border: 1px solid var(--ink); }
   .btn:hover { transform: translateY(-1px); }
   .btn-primary { background: var(--ink); color: var(--paper); }
   .textlink { font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink2);
@@ -108,7 +111,7 @@
                    bottom: 80px; width: 2px; background: var(--rule); }
   .stop { position: relative; padding: 0 0 76px var(--spine); }
   .stop::before { content: ""; position: absolute; left: calc(var(--spine) / 2 - 7px); top: 7px;
-                  width: 16px; height: 16px; border-radius: 50%;
+                  width: 16px; height: 16px; border-radius: 0;
                   background: var(--paper); border: 2px solid var(--ink); box-sizing: border-box; }
   .stop--key::before { background: var(--accent); border-color: var(--accent); }
   .stop--warn::before { background: var(--accent2); border-color: var(--accent2); }
@@ -128,11 +131,11 @@
   /* A white-background chart would glow in dark mode; the plate makes it read
      as a deliberately printed page instead. */
   figure { margin: 28px 0 0; }
-  .plate { background: var(--plate); border: 1px solid var(--rule); border-radius: 10px;
-           padding: 14px; box-shadow: var(--shadow); overflow: hidden; }
-  .plate img { border-radius: 4px; }
+  .plate { background: var(--plate); border: 1px solid var(--rule); border-radius: 0;
+           padding: 14px; overflow: hidden; }
+  .plate img { border-radius: 0; }
   .plate--flush { padding: 0; }
-  .shot { border-radius: 10px; border: 1px solid var(--rule); box-shadow: var(--shadow);
+  .shot { border-radius: 0; border: 1px solid var(--rule);
           overflow: hidden; background: var(--card); }
   /* min() so the cap never exceeds the column on a phone */
   .shot--narrow { max-width: min(430px, 100%); }
@@ -144,7 +147,7 @@
 
   .pull { margin: 30px 0 0; padding: 20px 25px; border-left: 3px solid var(--accent);
           background: color-mix(in srgb, var(--accent) 7%, transparent);
-          border-radius: 0 8px 8px 0; }
+          border-radius: 0; }
   .pull p { margin: 0 0 9px; color: var(--ink); max-width: none; }
   .pull p:last-of-type { margin: 0; }
   .pull .who { font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
@@ -152,14 +155,14 @@
 
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
           gap: 1px; margin-top: 28px; background: var(--rule);
-          border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+          border: 1px solid var(--rule); border-radius: 0; overflow: hidden; }
   .cell { background: var(--paper); padding: 22px 20px; }
   .cell p { font-size: 15px; margin: 0; color: var(--ink2); max-width: none;
             line-height: 1.55; font-family: var(--sans); }
 
   /* results tables: scroll inside their own box, never the page */
   .tablewrap { margin-top: 26px; overflow-x: auto; border: 1px solid var(--rule);
-               border-radius: 10px; background: var(--card); }
+               border-radius: 0; background: var(--card); }
   table { border-collapse: collapse; width: 100%; min-width: 480px;
           font-family: var(--sans); font-size: 15.5px; }
   th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--rule); }
@@ -171,8 +174,8 @@
             background: color-mix(in srgb, var(--accent) 8%, transparent); }
 
   /* real terminal output, quoted verbatim */
-  .term { margin-top: 26px; background: #14141f; color: #e6e3da; border-radius: 10px;
-          padding: 18px 20px; overflow-x: auto; box-shadow: var(--shadow);
+  .term { margin-top: 26px; background: #14141f; color: #e6e3da; border-radius: 0;
+          padding: 18px 20px; overflow-x: auto;
           border: 1px solid #2a2a3a; }
   .term pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.62;
               white-space: pre; }
@@ -205,7 +208,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .btn { transition: none; }
+    .btn { }
   }
 
 </style>
@@ -224,11 +227,11 @@
     <p class="hero-sub">
       Photograph a race course map and get a km-by-km pacing plan that accounts for
       hills, heat and realistic fade. Every plan is checked in plain code against
-      <strong>five deterministic rules</strong> — coverage, arithmetic sum against
+      <strong>five deterministic rules</strong>. Coverage, arithmetic sum against
       the stated goal, per-km plausibility against the course profile, fade
       direction, and a heat adjustment derived from
-      <a href="https://lyhjeremy.github.io/marathon-heat-tax/">a real Boston finding</a> —
-      before it is ever shown. Alongside it runs a model
+      <a href="https://lyhjeremy.github.io/marathon-heat-tax/">a real Boston finding</a>.
+      Before it is ever shown. Alongside it runs a model
       <strong>distilled onto this laptop</strong>, and the honest account of what
       it took to get there.
     </p>
@@ -313,7 +316,7 @@
       </div>
       <div class="cell">
         <h3>And it refuses</h3>
-        <p>Vision runs locally — OCR plus <code>claude -p</code> — and rejects
+        <p>Vision runs locally, OCR plus <code>claude -p</code>, and rejects
            photos that are not course maps rather than hallucinating a profile.</p>
       </div>
     </div>
@@ -330,8 +333,8 @@
     <p class="eyebrow">↓ a fair fight</p>
     <h2>The same prompt assembly for teacher and student</h2>
     <p>
-      Fourteen knowledge cards on pacing research — negative-split rarity, hill
-      effort strategy, the heat tax, wall decay — plus four findings digests, all
+      Fourteen knowledge cards on pacing research: negative-split rarity, hill
+      effort strategy, the heat tax, wall decay, plus four findings digests, all
       embedded locally and packed into the prompt by a priority-based
       <code>ContextBudgeter</code>.
     </p>
@@ -376,7 +379,7 @@
       That is a genuine and well-understood limitation of language models doing
       precise multi-step arithmetic, not a bug in the training. A blind judge
       preferred the teacher in <strong>93.3% of 60 pairwise comparisons</strong>,
-      with the LoRA at 0% and 6.7% ties — reported as it came out.
+      with the LoRA at 0% and 6.7% ties, reported as it came out.
     </p>
   </section>
 
@@ -422,14 +425,14 @@
           <img src="../eval/loss_curve.png" loading="lazy"
             alt="Training loss curve for the successful fourth LoRA attempt, descending and stabilising over roughly 400 iterations." />
         </div>
-        <figcaption><strong>The run that worked</strong> — about 400 clean iterations.</figcaption>
+        <figcaption><strong>The run that worked</strong>: about 400 clean iterations.</figcaption>
       </figure>
       <figure>
         <div class="plate">
           <img src="../eval/loss_curve_divergence_incident.png" loading="lazy"
             alt="Loss curve from a divergence incident, showing training loss climbing away instead of converging." />
         </div>
-        <figcaption><strong>One that didn't</strong> — committed rather than deleted.</figcaption>
+        <figcaption><strong>One that didn't</strong>: committed rather than deleted.</figcaption>
       </figure>
     </div>
     <div class="pull">
@@ -449,7 +452,7 @@
       <div class="spec"><dt>Retrieval</dt><dd>14 knowledge cards plus 4 findings digests, embedded with <code>sentence-transformers</code></dd></div>
       <div class="spec"><dt>Prompt assembly</dt><dd>Priority-based <code>ContextBudgeter</code>, shared identically by teacher and student</dd></div>
       <div class="spec"><dt>Vision</dt><dd>Local OCR plus <code>claude -p</code>; no Gemini or OpenAI vision key</dd></div>
-      <div class="spec"><dt>Heat rule</dt><dd>Derived from <a href="https://lyhjeremy.github.io/marathon-heat-tax/">The Heat Tax</a> — about one minute per °F on the field median</dd></div>
+      <div class="spec"><dt>Heat rule</dt><dd>Derived from <a href="https://lyhjeremy.github.io/marathon-heat-tax/">The Heat Tax</a>, about one minute per °F on the field median</dd></div>
       <div class="spec"><dt>Judging</dt><dd>60 blind pairwise comparisons; raw outputs for all three systems committed under <code>eval/</code></dd></div>
     </dl>
   </section>

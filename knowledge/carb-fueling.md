@@ -1,7 +1,7 @@
 # In-Race Carbohydrate Fueling
 > Source: Established marathon training principles
 
-Your muscles and brain run on carbohydrate, but your body stores only enough glycogen for roughly 90–120 minutes of hard running. When those stores run low, pace collapses — this is a major cause of "the wall." In-race fueling delays that depletion.
+Your muscles and brain run on carbohydrate, but your body stores only enough glycogen for roughly 90–120 minutes of hard running. When those stores run low, pace collapses. This is a major cause of "the wall." In-race fueling delays that depletion.
 
 **How much to take:**
 - A common target is **~30–60 g of carbohydrate per hour** for most marathoners.
@@ -9,7 +9,7 @@ Your muscles and brain run on carbohydrate, but your body stores only enough gly
 - Faster runners racing longer generally aim toward the higher end.
 
 **Timing:**
-- **Start early** — within the first 30–45 minutes — not when you already feel empty. Once you're depleted, it's too late to catch up.
+- **Start early.** Within the first 30–45 minutes, not when you already feel empty. Once you're depleted, it's too late to catch up.
 - Fuel at **regular intervals** (e.g. every 20–30 minutes) rather than in one large dose.
 
 **Practice it:**

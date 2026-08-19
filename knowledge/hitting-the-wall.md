@@ -1,11 +1,11 @@
 # Hitting the Wall: Where the Marathon Is Really Decided
 > Source: Jeremy Lee's Boston Marathon pacing-decay analysis
 
-"The wall" is not a myth or a metaphor — it is a measurable inflection point in pace, and the data pinpoint where it happens.
+"The wall" is not a myth or a metaphor. It is a measurable inflection point in pace, and the data pinpoint where it happens.
 
 **What the Boston data show (31,655 finishers):**
 - Pace stays roughly flat through about **20 km**.
-- From **~30 km** onward, pace climbs steeply — a clear, population-wide inflection.
+- From **~30 km** onward, pace climbs steeply. A clear, population-wide inflection.
 - Median late-race (35–40 km) slowdown is **15%**.
 - **27%** of finishers slowed by more than **25%** in the closing kilometers.
 
