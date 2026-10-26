@@ -3,55 +3,57 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Race Day Copilot: a pacing plan that gets checked before you see it</title>
-<meta name="description" content="Photograph a course map, get a verified km-by-km pacing plan. Five deterministic rules check every plan before it is shown. Plus a locally fine-tuned model, and an honest account of the four training attempts it took." />
-<meta name="theme-color" content="#EDEDE7" />
-<meta property="og:title" content="Race Day Copilot" />
-<meta property="og:description" content="Every plan checked in plain code against five rules before display. And the fine-tune that took four attempts and still lost on arithmetic." />
+<title>Race day copilot: verified pacing plans and a LoRA-distilled Qwen2.5-3B</title>
+<meta name="description" content="Photograph a course map, get a km-by-km pacing plan checked by six deterministic rules before display. A Qwen2.5-3B LoRA student distilled from Claude reaches 95.7% parse success on 70 held-out scenarios and fails on split arithmetic." />
+<meta name="theme-color" content="#ECEBE6" />
+<meta property="og:title" content="Race day copilot" />
+<meta property="og:description" content="Teacher 75.7% verifier pass, LoRA student 0.0% with 95.7% parse success: a distillation benchmark broken down check by check." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://lyhjeremy.github.io/race-day-copilot/overview/" />
+<link href="" rel="stylesheet" />
 <style>
-@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-400.woff2")format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-600.woff2")format("woff2");font-weight:600;font-display:swap}
-@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-400.woff2")format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-600.woff2")format("woff2");font-weight:600;font-display:swap}
-@font-face{font-family:"IBM Plex Mono";src:url("../fonts/IBMPlexMono-400.woff2")format("woff2");font-weight:400;font-display:swap}
-
   :root {
-    --paper: #EDEDE7;
-    --card: #F5F5F0;
-    --plate: #F5F5F0;
-    --ink: #1C1E1B;
-    --ink2: #3d3d55;
-    --muted: #52564E;
-    --rule: #C6C7BF;
-    --accent: #8C3A1E;
-    --accent2: #C2410C;
-    --link: #2C5852;
-    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
-    --sans: 'Source Sans 3', -apple-system, system-ui, sans-serif;
-    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
-    --shadow: 0 1px 2px rgba(26,26,46,.05), 0 10px 34px rgba(26,26,46,.07);
+    --paper: #ECEBE6;
+    --card: #F4F3EF;
+    --plate: #F4F3EF;
+    --ink: #1A1C1E;
+    --ink2: #4E535A;
+    --muted: #4E535A;
+    --rule: #C5C6C4;
+    --accent: #94462A;
+    --accent2: #1F4A72;
+    --link: #94462A;
+    --serif: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --edge: #73777C;
     --spine:  92px;
     --col:    min(100% - 2.6rem, 62rem);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #14141f;
-      --card: #1c1c2a;
-      --plate: #f7f4ec;
-      --ink: #F2EFE6;
-      --ink2: #C9C4B6;
-      --muted: #918B7D;
-      --rule: #33313f;
-      --accent: #22D3EE;
-      --accent2: #FB923C;
-      --link: #E0899A;
-      --shadow: 0 1px 2px rgba(0,0,0,.32), 0 10px 34px rgba(0,0,0,.4);
+      --paper: #17191C;
+      --card: #202327;
+      --plate: #202327;
+      --ink: #E4E5E3;
+      --ink2: #A3A8AE;
+      --muted: #A3A8AE;
+      --rule: #383C41;
+      --accent: #D9906C;
+      --accent2: #7FA8D3;
+      --link: #D9906C;
+      --edge: #6B7076;
     }
   }
 
-  * { box-sizing: border-box; }
+  @font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-400.woff2")format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-600.woff2")format("woff2");font-weight:600;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-400.woff2")format("woff2");font-weight:400;font-display:swap}
+  @font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-600.woff2")format("woff2");font-weight:600;font-display:swap}
+  @font-face{font-family:"IBM Plex Mono";src:url("../fonts/IBMPlexMono-400.woff2")format("woff2");font-weight:400;font-display:swap}
+
+  * { box-sizing: border-box; border-radius: 0; }
   html { scroll-behavior: smooth; }
   body {
     margin: 0; background: var(--paper); color: var(--ink);
@@ -210,62 +212,94 @@
     html { scroll-behavior: auto; }
     .btn { }
   }
+  @font-face{font-family:"Barlow Condensed";src:url("../fonts/BarlowCondensed-600.woff2")format("woff2");font-weight:600;font-style:normal;font-display:swap}
+  @font-face{font-family:"Barlow Condensed";src:url("../fonts/BarlowCondensed-700.woff2")format("woff2");font-weight:700;font-style:normal;font-display:swap}
 
+  .btn:hover { transform: none; background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .pull { border: 1px solid var(--edge); border-left: 1px solid var(--edge); background: transparent; }
+  .term { background: var(--card); color: var(--ink); border: 1px solid var(--rule); }
+  .term .c { color: var(--muted); } .term .g { color: var(--accent2); } .term .y { color: var(--accent); }
+  .logo, .hero h1, h2, .claim .n, .bignum { font-family: var(--display); }
+
+  /* Road: a race-day bib and the painted course line. Condensed caps, split-table numbers. */
+  body { border-top: 6px solid var(--accent2); }
+  .hero h1 { font-weight: 700; text-transform: uppercase; letter-spacing: -.01em; line-height: .95;
+             font-size: clamp(46px, 8.4vw, 104px); max-width: 15ch; }
+  h2 { font-weight: 600; letter-spacing: -.005em; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.02; }
+  .kicker { font-family: var(--mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .claim .n { font-weight: 700; font-size: 56px; letter-spacing: 0; }
+  .bignum { font-weight: 700; letter-spacing: -.01em; }
+  .route::before { width: 0; border-left: 3px dashed var(--accent2); background: none; }
+  .stop::before { border-radius: 0; width: 18px; height: 18px; left: calc(var(--spine) / 2 - 7.5px);
+                  border: 3px solid var(--accent2); }
+  .stop .eyebrow { color: var(--accent2); }
+
+
+  .course { margin: 22px 0 0; padding: 0; list-style: none; counter-reset: km; max-width: 62ch; }
+  .course li { counter-increment: km; position: relative; padding: 0 0 18px 64px; color: var(--ink2); }
+  .course li::before { content: counter(km); position: absolute; left: 0; top: 2px; width: 44px; height: 30px;
+                       border: 2px solid var(--ink); background: var(--paper); text-align: center;
+                       font: 700 20px/26px var(--display); color: var(--ink); }
+  .course li + li { border-top: 1px dashed var(--rule); padding-top: 14px; }
+  .course li + li::before { top: 16px; }
+  .course b { font-family: var(--sans); color: var(--ink); }
+  .rules { margin: 22px 0 0; border: 2px solid var(--ink); background: var(--card); }
+  .rules div { display: grid; grid-template-columns: 1fr; gap: 2px 20px; padding: 12px 18px; border-bottom: 1px dashed var(--rule); }
+  .rules div:last-child { border-bottom: 0; }
+  @media (min-width: 700px) { .rules div { grid-template-columns: 11rem minmax(0, 1fr); } }
+  .rules dt { font: 600 13px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+  .rules dd { margin: 0; font: 400 15.5px/1.55 var(--sans); color: var(--ink2); }
+  .sheet { min-width: 460px; }
+  .sheet td.num, .sheet th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sheet td.hi { font: 700 22px/1 var(--display); color: var(--accent2); }
+  .sheet td.bad { font: 700 22px/1 var(--display); color: var(--accent); }
+  .sheet-note { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin: 10px 0 0; max-width: 62ch; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="masthead">
-    <div class="logo"><span class="dot" aria-hidden="true"></span>Race Day Copilot</div>
-    <div class="tagline">course photo in, verified pacing plan out</div>
+    <div class="logo"><span class="dot" aria-hidden="true"></span>Race day copilot</div>
+    <div class="tagline">OCR, retrieval, a code verifier, and a LoRA-distilled Qwen2.5-3B</div>
   </header>
 
   <section class="hero">
-    <p class="kicker">Ask a chatbot for a pacing plan and it hands you splits that don't add up.</p>
-    <h1>Nothing here is trusted on vibes.</h1>
+    <p class="kicker">Guardrails and distillation, benchmarked</p>
+    <h1>A pacing plan that has to pass six checks in code before you see it</h1>
 
     <p class="hero-sub">
-      Photograph a race course map and get a km-by-km pacing plan that accounts for
-      hills, heat and realistic fade. Every plan is checked in plain code against
-      <strong>five deterministic rules</strong>. Coverage, arithmetic sum against
-      the stated goal, per-km plausibility against the course profile, fade
-      direction, and a heat adjustment derived from
-      <a href="https://lyhjeremy.github.io/marathon-heat-tax/">a real Boston finding</a>.
-      Before it is ever shown. Alongside it runs a model
-      <strong>distilled onto this laptop</strong>, and the honest account of what
-      it took to get there.
+      Photograph a race course map and state a goal. Local OCR and Claude turn the
+      photo into a course profile, retrieval adds pacing research from 14
+      knowledge cards, and Claude writes a km-by-km plan. <code>verifier.py</code>
+      then checks the plan for coverage, split arithmetic, hill plausibility,
+      fade, heat and citations, and any failure goes back to the model as a
+      plain-English sentence. I also distilled the task into a 4-bit Qwen2.5-3B
+      with LoRA, trained on a laptop from 1,321 verifier-passed teacher plans. On
+      70 held-out scenarios the student formats almost every plan correctly and
+      fails on arithmetic.
     </p>
 
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/lyhjeremy/race-day-copilot/blob/main/writeup.md">Read the writeup</a>
-      <a class="textlink" href="https://github.com/lyhjeremy/race-day-copilot">or the code</a>
+      <a class="btn btn-primary" href="https://github.com/lyhjeremy/race-day-copilot">Code on GitHub</a>
+      <a class="textlink" href="https://github.com/lyhjeremy/race-day-copilot/blob/main/eval/benchmark.md">The benchmark file</a>
     </div>
-
-    <figure style="margin-top:38px">
-      <img class="shot" src="../assets/banner.png"
-        alt="Race Day Copilot banner artwork." />
-    </figure>
 
     <div class="claims">
       <div class="claim">
-        <div class="n">5 rules</div>
-        <p>every plan must pass in deterministic code before it reaches the
-           screen. No plan is displayed unchecked.</p>
+        <div class="n">75.7%</div>
+        <p>of the Claude teacher's zero-shot plans pass every check on the 70 held-out scenarios.</p>
       </div>
       <div class="claim">
-        <div class="n">95.7%</div>
-        <p>parse success from the fine-tuned model, up from <strong>55.7%</strong>
-           for the base. Structure was learned convincingly.</p>
+        <div class="n">55.7% to 95.7%</div>
+        <p>Parse success for Qwen2.5-3B before and after LoRA fine-tuning.</p>
       </div>
       <div class="claim">
-        <div class="n">4</div>
-        <p>LoRA training attempts, including two divergence incidents and a silent
-           zero-loss bug. All four are documented.</p>
+        <div class="n">0.0%</div>
+        <p>Full verifier pass rate for the LoRA student: 82.9% of its plans miss the 90-second sum tolerance.</p>
       </div>
       <div class="claim">
-        <div class="n">82.9%</div>
-        <p>of the fine-tune's plans still miss the 90-second sum tolerance. The
-           gap is arithmetic, and it is named.</p>
+        <div class="n">96.0%</div>
+        <p>of teacher generations accepted while building the training set: 1,458 of 1,519 attempts.</p>
       </div>
     </div>
   </section>
@@ -274,186 +308,142 @@
 <div class="wrap">
 <div class="route">
 
+  <section class="stop">
+    <p class="eyebrow">The pipeline</p>
+    <h2>Photo to verified plan</h2>
+    <ol class="course">
+      <li><b>Read the map.</b> <code>src/vision.py</code> runs Tesseract OCR on the photo, then <code>claude -p</code> parses the text into a <code>CourseProfile</code>: distance, hill segments with trend and severity, and a confidence. A photo that isn't a course map gets a refusal.</li>
+      <li><b>Retrieve.</b> 14 knowledge cards on pacing research (negative-split rarity, hill effort, the heat tax, the wall) plus findings digests, embedded locally with sentence-transformers.</li>
+      <li><b>Pack the prompt.</b> A priority-based <code>ContextBudgeter</code> fits the course, the runner brief and the retrieved cards into a token budget and reports each section's share. Teacher and student get the same assembled prompt.</li>
+      <li><b>Generate.</b> Claude, or the local LoRA model, writes a structured <code>PacingPlan</code>: per-km target paces, predicted finish, fade allowance, heat adjustment, cautions, citations.</li>
+      <li><b>Verify and retry.</b> <code>verify()</code> returns a list of violation sentences. An empty list passes. Otherwise the sentences go into the next prompt, up to two retries.</li>
+    </ol>
+  </section>
+
   <section class="stop stop--key">
-    <p class="eyebrow">↓ the guardrail</p>
-    <h2>The verifier is the product</h2>
-    <p>
-      A plausible-looking table of splits is the easiest thing in the world for a
-      language model to produce and one of the hardest for a runner to check at a
-      glance. Ask for a 3:30 marathon plan and you will cheerfully receive splits
-      that sum to 3:24, ignore a 200-metre climb, or assume a negative split that
-      <a href="https://lyhjeremy.github.io/marathon-negative-split-myth/">97.5% of runners never achieve</a>.
+    <p class="eyebrow">The verifier</p>
+    <h2>Six rules, with the tolerances in the code</h2>
+    <dl class="rules">
+      <div><dt>01 Coverage</dt><dd>One split per km, plus the partial final km for distances like 21.1 or 42.2.</dd></div>
+      <div><dt>02 Sum</dt><dd>Splits add up to the goal within 90 seconds, or to the plan's own predicted finish if it flags the goal as unrealistic.</dd></div>
+      <div><dt>03 Plausibility</dt><dd>No split more than 12% slower than the mean pace, or 20% on a steep climb; on a downhill no split more than 20% faster.</dd></div>
+      <div><dt>04 Fade</dt><dd>Second half 0 to 8% slower than the first. A negative split is allowed only with a caution citing the 2.5% base rate. The plan's <code>fade_allowance_pct</code> must match its own splits within 0.5 points.</dd></div>
+      <div><dt>05 Heat</dt><dd>At 18&deg;C or above, the per-km heat adjustment must fall between 0.75 and 4.5 seconds per degree over 15&deg;C, a band derived from my Boston heat-tax finding of about 1 minute per &deg;F.</dd></div>
+      <div><dt>06 Citations</dt><dd>At least one citation, and only ids that were actually retrieved.</dd></div>
+    </dl>
+    <p style="margin-top:22px">
+      Earlier descriptions of this project counted five checks. The citation rule
+      lives in the same function and is scored in the benchmark, so it is listed
+      here as the sixth.
     </p>
-    <p>
-      So <code>verifier.py</code> checks every plan against five rules in ordinary
-      Python before display:
-    </p>
-    <div class="grid">
-      <div class="cell">
-        <h3>Coverage</h3>
-        <p>Every kilometre of the race is accounted for, with none missing and none
-           invented.</p>
-      </div>
-      <div class="cell">
-        <h3>Arithmetic</h3>
-        <p>The splits actually sum to the stated goal time, within a 90-second
-           tolerance.</p>
-      </div>
-      <div class="cell">
-        <h3>Per-km plausibility</h3>
-        <p>Each split is sane against that segment's real gradient. A climb cannot
-           be paced like a descent.</p>
-      </div>
-      <div class="cell">
-        <h3>Fade direction</h3>
-        <p>The plan fades the way real fields fade, in the right direction and by a
-           believable magnitude.</p>
-      </div>
-      <div class="cell">
-        <h3>Heat adjustment</h3>
-        <p>A formula derived from a real measured effect: about a minute per °F on
-           the field median.</p>
-      </div>
-      <div class="cell">
-        <h3>And it refuses</h3>
-        <p>Vision runs locally, OCR plus <code>claude -p</code>, and rejects
-           photos that are not course maps rather than hallucinating a profile.</p>
-      </div>
-    </div>
-    <figure>
-      <div class="plate">
-        <img src="../assets/architecture.png" loading="lazy"
-          alt="Race Day Copilot pipeline diagram: course photo into local OCR and structured extraction, then retrieval over knowledge cards with a context budgeter, then generation, then the five-rule verifier before display." />
-      </div>
-      <figcaption>Retrieval, generation, then the verifier gate. Nothing skips the gate.</figcaption>
-    </figure>
   </section>
 
   <section class="stop">
-    <p class="eyebrow">↓ a fair fight</p>
-    <h2>The same prompt assembly for teacher and student</h2>
+    <p class="eyebrow">The benchmark</p>
+    <h2>Base against LoRA against teacher</h2>
     <p>
-      Fourteen knowledge cards on pacing research: negative-split rarity, hill
-      effort strategy, the heat tax, wall decay, plus four findings digests, all
-      embedded locally and packed into the prompt by a priority-based
-      <code>ContextBudgeter</code>.
+      70 held-out scenarios, split by scenario id (seed 42, 90/5/5), zero-shot
+      with no retries, identical prompts for all three systems. From
+      <code>eval/benchmark.md</code>.
     </p>
-    <p>
-      The detail that makes the benchmark trustworthy: <strong>the exact same
-      prompt-assembly code serves the Claude teacher and the local student</strong>.
-      Neither ever receives a hint the other did not. It is easy to accidentally
-      benchmark two different prompts and report it as a model comparison.
-    </p>
-  </section>
-
-  <section class="stop stop--warn">
-    <p class="eyebrow">↓ the result, without the spin</p>
-    <h2>It learned the shape and not the arithmetic</h2>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr><th>System</th><th>Parse success</th><th>Verifier pass rate</th><th>Latency</th></tr>
-        </thead>
+    <div class="tablewrap" role="region" aria-label="Benchmark of three systems" tabindex="0">
+      <table class="sheet">
+        <thead><tr><th>System</th><th class="num">Parse success</th><th class="num">Verifier pass</th><th class="num">Latency, s/plan</th></tr></thead>
         <tbody>
-          <tr><td>Base Qwen2.5-3B (no fine-tune)</td><td>55.7%</td><td>0.0%</td><td>17.5s</td></tr>
-          <tr><td>+ LoRA (this project)</td><td>95.7%</td><td>0.0%</td><td>53.7s</td></tr>
-          <tr class="win"><td>Claude (teacher, zero-shot)</td><td>90.0%</td><td>75.7%</td><td>157.7s</td></tr>
+          <tr><td>Qwen2.5-3B base</td><td class="num">55.7%</td><td class="num">0.0%</td><td class="num">17.5</td></tr>
+          <tr><td>Qwen2.5-3B + LoRA</td><td class="num hi">95.7%</td><td class="num">0.0%</td><td class="num">53.7</td></tr>
+          <tr><td>Claude teacher</td><td class="num">90.0%</td><td class="num hi">75.7%</td><td class="num">157.7</td></tr>
         </tbody>
       </table>
     </div>
+    <p style="margin-top:24px">The pass rate alone hides where the student fails. Share of plans failing each check:</p>
+    <div class="tablewrap" role="region" aria-label="Per-check violation rates" tabindex="0">
+      <table class="sheet">
+        <thead><tr><th>Check</th><th class="num">Base</th><th class="num">LoRA</th><th class="num">Teacher</th></tr></thead>
+        <tbody>
+          <tr><td>Parse</td><td class="num bad">44.3%</td><td class="num">4.3%</td><td class="num">10.0%</td></tr>
+          <tr><td>Coverage</td><td class="num bad">55.7%</td><td class="num">2.9%</td><td class="num">0.0%</td></tr>
+          <tr><td>Sum</td><td class="num">0.0%</td><td class="num bad">82.9%</td><td class="num">2.9%</td></tr>
+          <tr><td>Plausibility</td><td class="num">0.0%</td><td class="num">1.4%</td><td class="num">0.0%</td></tr>
+          <tr><td>Fade</td><td class="num">0.0%</td><td class="num bad">91.4%</td><td class="num">5.7%</td></tr>
+          <tr><td>Heat</td><td class="num">0.0%</td><td class="num">4.3%</td><td class="num">0.0%</td></tr>
+          <tr><td>Citations</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">8.6%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sheet-note">Base plans fail at parse or coverage, so the verifier returns early and the later checks never run on them; their 0.0% there means "not reached".</p>
     <p style="margin-top:22px">
-      A 0.0% verifier pass rate looks like total failure and is not, but the
-      distinction only survives if you read the per-check breakdown. The fine-tune
-      reaches <strong>near-parity with the teacher</strong> on structure, coverage,
-      hill plausibility and the heat formula, all under 5% failure.
+      The LoRA student is close to the teacher on structure, coverage, hill
+      plausibility, heat and citations. It fails on the two checks that need exact
+      arithmetic across 42 numbers. A typical student plan misses the goal by 430
+      to 730 seconds, and its <code>fade_allowance_pct</code> often disagrees with
+      its own splits in sign, for example reporting 4.5 while the splits compute
+      &minus;5.1%. In a blind, position-swapped LLM-judge comparison on 60 pairs,
+      the teacher was preferred 93.3% of the time, the student never, with 6.7% ties.
     </p>
+  </section>
+
+  <section class="stop">
+    <p class="eyebrow">The fine-tune</p>
+    <h2>Four training attempts on a 16 GB Mac</h2>
     <p>
-      What it cannot do is <strong>exact split arithmetic</strong>.
-      <strong>82.9%</strong> of its plans miss the 90-second sum tolerance, and
-      <strong>91.4%</strong> show a self-consistency mismatch between the model's
-      own <code>fade_allowance_pct</code> field and what its own splits compute.
-      Since the verifier is strict and every rule must pass, one persistent failure
-      mode zeroes the whole column.
+      Training data: 1,458 accepted scenarios across 6 course profiles, 14 goal
+      times, 6 temperatures and 3 experience levels, split into 1,321 train, 67
+      validation and 70 test, with a leakage check. Training used
+      <code>mlx_lm</code> LoRA on <code>mlx-community/Qwen2.5-3B-Instruct-4bit</code>,
+      16 layers, batch size 1, gradient accumulation 4, learning rate 5e-5,
+      gradient checkpointing.
     </p>
-    <p>
-      That is a genuine and well-understood limitation of language models doing
-      precise multi-step arithmetic, not a bug in the training. A blind judge
-      preferred the teacher in <strong>93.3% of 60 pairwise comparisons</strong>,
-      with the LoRA at 0% and 6.7% ties, reported as it came out.
-    </p>
+    <dl class="specs">
+      <div class="spec"><dt>Sequence length</dt><dd>The planned 1,536 tokens was too short. The longest real example measured 4,197 tokens with the Qwen tokenizer, so the budget became 4,608, asserted before training.</dd></div>
+      <div class="spec"><dt>Silent failure</dt><dd>Without gradient checkpointing, memory overflowed and training printed "Train loss 0.000, Trained Tokens 0" every report instead of crashing. A 10-iteration repro confirmed it; checkpointing brought peak memory to about 13 GB.</dd></div>
+      <div class="spec"><dt>Divergence</dt><dd>Loss fell from 1.666 to 0.256, then climbed to 1.651 around iteration 280. Halving the learning rate and adding accumulation delayed it but didn't stop it.</dd></div>
+      <div class="spec"><dt>Clipping</dt><dd><code>train_clipped.py</code> reuses <code>mlx_lm.lora</code>'s loop and adds <code>clip_grad_norm</code>, since the CLI has no clipping flag. It diverged again; gradient norms stayed at 0.18 to 0.35, under the 1.0 threshold, so clipping never engaged.</dd></div>
+      <div class="spec"><dt>Decision</dt><dd>Ship the best checkpoint, about 400 clean iterations at validation loss 0.226, and leave the next hypothesis (a constant learning rate with no decay) for later.</dd></div>
+    </dl>
+    <figure>
+      <div class="plate">
+        <img width="1050" height="600" src="../eval/loss_curve.png" loading="lazy"
+          alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." />
+      </div>
+      <figcaption>Loss for the published checkpoint. The divergence runs are in <code>eval/loss_curve_divergence_incident.png</code> and <code>training/*.log</code>.</figcaption>
+    </figure>
   </section>
 
   <section class="stop stop--warn">
-    <p class="eyebrow">↓ the part usually left out</p>
-    <h2>Four attempts, and what went wrong in each</h2>
+    <p class="eyebrow">Limitations</p>
+    <h2>What this doesn't show</h2>
     <p>
-      Most fine-tuning writeups present a loss curve that descends politely. This
-      one took <strong>four attempts</strong>, and the failures were more
-      instructive than the success:
+      The student model is not usable on its own yet: no held-out plan passed
+      every check. It would need either a decaying learning-rate schedule and more
+      training, or the arithmetic moved out of the model, for example by having it
+      emit relative effort and computing the splits in code.
     </p>
-    <div class="grid">
-      <div class="cell">
-        <h3>A sequence-length assumption 2.7× too short</h3>
-        <p>Training examples were being truncated well before the part that
-           mattered, so the model never saw the ends of its own targets.</p>
-      </div>
-      <div class="cell">
-        <h3>A silent zero-loss bug</h3>
-        <p>The worst failure mode available: training that reports success while
-           learning nothing at all.</p>
-      </div>
-      <div class="cell">
-        <h3>Two divergence incidents</h3>
-        <p>Loss departing upward and not returning. The curve for one of them is
-           committed to the repository rather than deleted.</p>
-      </div>
-      <div class="cell">
-        <h3>A custom gradient-clipping script</h3>
-        <p>Written to get a stable run out of the fourth attempt after the stock
-           configuration would not converge.</p>
-      </div>
-    </div>
-    <p style="margin-top:24px">
-      The shipped adapter comes from roughly <strong>400 clean iterations</strong>.
-      Stopping there rather than chasing a fifth attempt was a deliberate call: the
-      remaining gap is arithmetic, and more of the same training was not going to
-      close it.
+    <p>
+      The 70 test scenarios come from the same six synthetic course profiles as
+      the training data, so the benchmark doesn't test unseen course shapes or real
+      photographed maps. The LLM judge is Claude, which is also the teacher. And the
+      archived raw outputs in <code>eval/raw_outputs_*.json</code> were truncated at
+      4,000 characters when saved; scoring ran on the full text before truncation,
+      so the metrics stand, but the archive is incomplete.
     </p>
-    <div class="panels">
-      <figure>
-        <div class="plate">
-          <img src="../eval/loss_curve.png" loading="lazy"
-            alt="Training loss curve for the successful fourth LoRA attempt, descending and stabilising over roughly 400 iterations." />
-        </div>
-        <figcaption><strong>The run that worked</strong>: about 400 clean iterations.</figcaption>
-      </figure>
-      <figure>
-        <div class="plate">
-          <img src="../eval/loss_curve_divergence_incident.png" loading="lazy"
-            alt="Loss curve from a divergence incident, showing training loss climbing away instead of converging." />
-        </div>
-        <figcaption><strong>One that didn't</strong>: committed rather than deleted.</figcaption>
-      </figure>
-    </div>
-    <div class="pull">
-      <p>A repository that only contains the run that worked is not showing you how
-         the model was built. It is showing you the last thing that happened.</p>
-      <span class="who">Why the divergence curve is in the repo</span>
-    </div>
+    <p>
+      Plans are pacing guidance for adult runners, not medical advice. The app runs
+      on your own machine; there is no hosted demo.
+    </p>
   </section>
 
   <section class="stop stop--end">
-    <p class="eyebrow">Finish · what it is built on</p>
-    <h2>Where the numbers come from</h2>
+    <p class="eyebrow">Stack</p>
+    <h2>What it runs on</h2>
     <dl class="specs">
-      <div class="spec"><dt>Base model</dt><dd>Qwen2.5-3B, LoRA fine-tuned on a laptop</dd></div>
-      <div class="spec"><dt>Training data</dt><dd>1,458 teacher-generated, verifier-passed scenarios</dd></div>
-      <div class="spec"><dt>Benchmark</dt><dd>70 held-out scenarios, split by scenario id, zero-shot with no retries</dd></div>
-      <div class="spec"><dt>Retrieval</dt><dd>14 knowledge cards plus 4 findings digests, embedded with <code>sentence-transformers</code></dd></div>
-      <div class="spec"><dt>Prompt assembly</dt><dd>Priority-based <code>ContextBudgeter</code>, shared identically by teacher and student</dd></div>
-      <div class="spec"><dt>Vision</dt><dd>Local OCR plus <code>claude -p</code>; no Gemini or OpenAI vision key</dd></div>
-      <div class="spec"><dt>Heat rule</dt><dd>Derived from <a href="https://lyhjeremy.github.io/marathon-heat-tax/">The Heat Tax</a>, about one minute per °F on the field median</dd></div>
-      <div class="spec"><dt>Judging</dt><dd>60 blind pairwise comparisons; raw outputs for all three systems committed under <code>eval/</code></dd></div>
+      <div class="spec"><dt>Vision</dt><dd>Tesseract OCR plus <code>claude -p</code> for structured parsing; no vision API key</dd></div>
+      <div class="spec"><dt>Retrieval</dt><dd>sentence-transformers embeddings, priority-based context budgeting</dd></div>
+      <div class="spec"><dt>Generation</dt><dd>Claude as teacher; Qwen2.5-3B-Instruct 4-bit with a LoRA adapter as student</dd></div>
+      <div class="spec"><dt>Training</dt><dd>MLX (<code>mlx_lm</code>) on Apple silicon, custom clipped training loop</dd></div>
+      <div class="spec"><dt>Guardrails</dt><dd>Pydantic schemas, <code>verifier.py</code>, bounded retry loop with violation feedback</dd></div>
+      <div class="spec"><dt>Interface</dt><dd>Gradio app: photo, brief, plan, verification, text-to-speech</dd></div>
+      <div class="spec"><dt>Tests</dt><dd><code>tests/test_verifier.py</code></dd></div>
     </dl>
   </section>
 
@@ -462,22 +452,24 @@
 
 <div class="wrap">
   <section class="close">
-    <h2>The plan you see has already been checked</h2>
+    <h2>The student learned the format and not the arithmetic</h2>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/lyhjeremy/race-day-copilot/blob/main/writeup.md">Read the writeup</a>
-      <a class="textlink" href="https://github.com/lyhjeremy/race-day-copilot">or the code</a>
+      <a class="btn btn-primary" href="https://github.com/lyhjeremy/race-day-copilot">Code on GitHub</a>
+      <a class="textlink" href="../">Back to the project page</a>
     </div>
   </section>
 
   <footer>
     <p>
-      Race Day Copilot ·
-      <a href="../">Showcase</a> ·
-      <a href="https://github.com/lyhjeremy/race-day-copilot/blob/main/writeup.md">Writeup</a> ·
+      Race day copilot ·
+      <a href="../">Project page</a> ·
+      <a href="https://github.com/lyhjeremy/race-day-copilot/blob/main/writeup.md">Long-form notes</a> ·
       <a href="https://github.com/lyhjeremy/race-day-copilot">Source</a> ·
+      <a href="../privacy/">Privacy</a> ·
+      <a href="../terms/">Terms</a> ·
       MIT © 2026 Jeremy Lee
     </p>
-    <p>Educational tool, not coaching or medical advice.</p>
+    <p>Pacing guidance, not medical advice.</p>
   </footer>
 </div>
 </body>

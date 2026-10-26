@@ -1,137 +1,91 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Race Day Copilot" width="100%">
-</p>
+# Race day copilot
 
-# Race Day Copilot
+Photograph a race course map and get a km-by-km pacing plan that passes six deterministic checks before you see it, plus a LoRA fine-tune of Qwen2.5-3B distilled from Claude to do the same job locally.
+
+[Live site](https://lyhjeremy.github.io/race-day-copilot/) · [Write-up](https://lyhjeremy.github.io/race-day-copilot/overview/) · [Long-form notes](writeup.md) · [Benchmark](eval/benchmark.md)
 
 Design and copy follow [these standards](https://github.com/lyhjeremy/lyhjeremy/blob/main/DESIGN_STANDARDS.md).
 
-Photograph a race course map: get a verified, km-by-km pacing plan that
-accounts for hills, heat, and realistic fade, plus a **locally fine-tuned
-model** distilled to produce the same plans without calling Claude.
+## Results
 
-## Why
+70 held-out scenarios, split by scenario id (seed 42, 90/5/5), zero-shot with no retries, the same prompt for all three systems:
 
-Ask a chatbot for a marathon pacing plan and it will happily hand you a
-plausible-looking table of splits that doesn't actually sum to your goal
-time, ignores the course's hills, or quietly assumes a negative split
-that 97.5% of runners never achieve. Race Day Copilot never trusts a
-plan on vibes: every plan is checked in plain code against five
-deterministic rules (coverage, arithmetic sum, per-km plausibility vs.
-the course profile, fade direction, and a heat-adjustment formula derived
-from a real Boston Marathon finding) before it's shown to you.
+| System | Parse success | Passes all checks | Latency (s/plan) |
+|---|---|---|---|
+| Qwen2.5-3B base, no fine-tune | 55.7% | 0.0% | 17.5 |
+| Qwen2.5-3B + LoRA (this project) | 95.7% | 0.0% | 53.7 |
+| Claude teacher, zero-shot | 90.0% | 75.7% | 157.7 |
 
-> **Overview:** https://lyhjeremy.github.io/race-day-copilot/
-> **Product overview:** https://lyhjeremy.github.io/race-day-copilot/overview/
+The LoRA student learned the format: it fails coverage on 2.9% of plans, plausibility on 1.4%, heat on 4.3% and citations on none. It fails on arithmetic: 82.9% of its plans miss the goal by more than 90 seconds, and 91.4% report a `fade_allowance_pct` that doesn't match their own splits. In 60 blind, position-swapped LLM-judge comparisons, the teacher was preferred 93.3% of the time, the student 0%, with 6.7% ties. Full per-check table in [`eval/benchmark.md`](eval/benchmark.md).
+
+<p align="center">
+  <img src="eval/loss_curve.png" alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." width="600">
+</p>
 
 ## How it works
 
-<p align="center">
-  <img src="assets/architecture.png" alt="Race Day Copilot pipeline" width="760">
-</p>
+1. **Vision.** `src/vision.py` runs Tesseract OCR on the photo, then `claude -p` parses the text into a `CourseProfile` (distance, hill segments with trend and severity, confidence). Non-course photos get a refusal. No vision API key.
+2. **Retrieval.** 14 knowledge cards of pacing research plus findings digests, embedded locally with sentence-transformers.
+3. **Context engineering.** A priority-based `ContextBudgeter` packs the course, runner brief and retrieved cards into a token budget and reports each section's allocation (`ContextBudgeter.pack().report`). Teacher and student get the identical assembled prompt.
+4. **Generation.** Claude or the local LoRA model returns a Pydantic `PacingPlan`: per-km paces, predicted finish, fade allowance, heat adjustment, cautions, citations.
+5. **Verification.** [`src/verifier.py`](src/verifier.py) runs six checks and returns each violation as a sentence; violations go back into the prompt for up to two retries.
+   - Coverage: one split per km plus the partial final km.
+   - Sum: splits total the goal within 90 seconds (or the plan's own predicted finish if it flags the goal as unrealistic).
+   - Plausibility: no split more than 12% slower than mean pace (20% on steep climbs), no downhill split more than 20% faster.
+   - Fade: second half 0 to 8% slower, or a negative split flagged with a caution citing the 2.5% base rate; `fade_allowance_pct` must match the splits within 0.5 points.
+   - Heat: at 18°C or above, an adjustment of 0.75 to 4.5 s/km per degree over 15°C, derived from my [Boston heat-tax finding](https://github.com/lyhjeremy/marathon-heat-tax) of about 1 minute per °F.
+   - Citations: at least one, and only retrieved ids.
+6. **Distillation.** 1,458 verifier-passed teacher plans (96.0% of 1,519 generation attempts) across 6 course profiles, 14 goal times, 6 temperatures and 3 experience levels, split 1,321 / 67 / 70 with a leakage check. LoRA on `mlx-community/Qwen2.5-3B-Instruct-4bit` with MLX: 16 layers, batch size 1, gradient accumulation 4, learning rate 5e-5, max sequence length 4,608, gradient checkpointing, gradient clipping at 1.0.
 
-- **Vision, entirely local.** No Gemini/OpenAI vision key required:
-  local OCR + `claude -p` (Claude Max subscription, no per-token cost)
-  reads a course-map photo into a structured `CourseProfile` (distance,
-  hill segments, confidence), refusing non-course photos.
-- **Retrieval.** 14 knowledge cards (pacing research: negative-split
-  rarity, hill-effort strategy, heat tax, hitting-the-wall decay) plus 4
-  findings digests, embedded locally with `sentence-transformers`, packed
-  into the prompt by a priority-based `ContextBudgeter`. The exact same
-  prompt-assembly code is used for the Claude teacher and the local
-  student, so neither ever gets a hint the other doesn't.
-- **Grounded, verified generation.** Every plan is checked by
-  [`verifier.py`](src/verifier.py) against five deterministic rules
-  before it's ever shown: split coverage, arithmetic sum vs. the stated
-  goal, per-km plausibility vs. the course's hill segments, fade
-  direction/magnitude, and a heat-adjustment formula derived from
-  [a real Boston Marathon finding](https://github.com/lyhjeremy/marathon-heat-tax)
-  (~1 min slower per °F on the field median).
-- **A locally fine-tuned distillation model.** A **Qwen2.5-3B model,
-  LoRA fine-tuned on this laptop** on 1,458 teacher-generated,
-  verifier-passed scenarios, producing the same pacing plans without a
-  network call.
+Earlier versions of this README counted five checks; the citation rule is the sixth and is scored in the benchmark.
 
-## The fine-tune, honestly benchmarked (and the training saga behind it)
+## Training notes
 
-Held-out benchmark (70 scenarios, split by scenario id, zero-shot/no-retry):
+It took four attempts over two days. The planned sequence length (1,536) was 2.7 times shorter than the longest real example (4,197 tokens, measured with the Qwen tokenizer). Without gradient checkpointing the 16 GB Mac ran out of memory and training printed `Train loss 0.000` and `Trained Tokens 0` instead of crashing. Loss then diverged three times, including once with a custom training loop (`training/lora_harness/train_clipped.py`) that adds gradient clipping, which `mlx_lm.lora`'s CLI doesn't expose; gradient norms stayed at 0.18 to 0.35, so clipping never engaged. The published adapter is the best checkpoint, about 400 clean iterations at validation loss 0.226. The untested next hypothesis is the constant learning rate. Details in [`writeup.md`](writeup.md).
 
-| System | Parse success | Verifier pass rate | Latency (s/plan) |
-|---|---|---|---|
-| Base Qwen2.5-3B (no fine-tune) | 55.7% | 0.0% | 17.5s |
-| **+ LoRA (this project)** | **95.7%** | 0.0%* | 53.7s |
-| Claude (teacher, zero-shot) | 90.0% | **75.7%** | 157.7s |
+## Stack
 
-\* **Not a floor result, read the per-check breakdown.** LoRA achieves
-near-parity with the teacher on structure, coverage, hill plausibility,
-and the heat formula (all <5% failure). The real, well-understood
-remaining gap is **exact split-time arithmetic** (82.9% of plans miss the
-90-second sum tolerance) and a **self-consistency mismatch** in the
-model's own `fade_allowance_pct` field vs. what its own splits compute
-(91.4%). A genuine LLM limitation with precise multi-step arithmetic,
-not a bug. Full per-check table, judge results (teacher preferred in
-93.3% of 60 blind pairwise comparisons, LoRA 0%, 6.7% tie, consistent
-with the objective gap), and methodology in [`eval/benchmark.md`](eval/benchmark.md).
+Python, Tesseract (pytesseract), Claude CLI, sentence-transformers, Pydantic, MLX (`mlx_lm`), Qwen2.5-3B-Instruct, Gradio.
 
-**This was the hardest fine-tune of the whole 5-project build.** Getting
-here took four separate training attempts across two days: a spec-assumed
-sequence length that was 2.7x too short (measured with the real
-tokenizer, not guessed), a memory bug that silently produced fake
-`0.000`-loss "training" that looked alive but wasn't, two loss-divergence
-incidents (the second surviving longer after mitigation, but still
-recurring), and finally a **custom training script built from scratch**
-adding real gradient clipping, something `mlx_lm.lora`'s packaged CLI
-doesn't expose at all. Even that didn't fully eliminate the instability;
-the final published model is the best checkpoint from ~400 iterations of
-confirmed-clean training, stopped deliberately rather than chased
-further. Full blow-by-blow in [`writeup.md`](writeup.md).
-
-## Guardrails
-
-- **Deterministic verifier, not vibes.** 5 checks (coverage, sum, per-km
-  plausibility, fade, heat), every violation a human-readable sentence
-  fed back into a bounded retry loop.
-- **Domain gate.** A non-course photo gets a friendly refusal, not a
-  hallucinated route.
-- **Identical prompt for teacher and student.** The benchmark compares
-  what each system brings on its own, no schema hint given to one and
-  not the other.
-- **Context budget report.** Every prompt's section-by-section token
-  allocation is inspectable (`ContextBudgeter.pack().report`).
-
-## Files
-
-| File | Purpose |
-|---|---|
-| `app.py` | Gradio app (photo → brief → plan → verify → TTS) |
-| `scripts/gen_scenarios.py` | Overnight resumable scenario generator (teacher + verifier) |
-| `scripts/make_example_courses.py` | Hand-built `CourseProfile` fixtures (6 archetypes) |
-| `training/prep_scenarios.py` | Scenario-id-split, leakage-checked dataset prep |
-| `training/lora_harness/train_clipped.py` | Custom training script with real gradient clipping (`mlx_lm.lora`'s CLI has none) |
-| `training/bench_copilot.py` | 3-way honest benchmark (base/LoRA/Claude) + blind pairwise judge |
-| `src/verifier.py` | The five deterministic pacing-plan checks |
-| `src/copilot.py` | Prompt assembly (identical for teacher + student) |
-| `src/` | Vendored toolkit (llm, vision, guardrails, context, cache) |
-| `eval/` | Benchmark results, loss curves, judge outputs, dataset card |
-
-## Running it
+## How to run
 
 ```bash
 pip install -r requirements.txt
 python scripts/make_example_courses.py       # 6 course fixtures (committed)
-python scripts/gen_scenarios.py              # scenario generation (overnight, resumable)
-python training/prep_scenarios.py            # scenario-id-split train/valid/test
-bash training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-Instruct-4bit \
+python scripts/gen_scenarios.py              # scenario generation (long-running, resumable)
+python training/prep_scenarios.py            # scenario-id split train/valid/test
+python training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-Instruct-4bit \
     --data data/lora --train --batch-size 1 --num-layers 16 --iters 1000 \
     --learning-rate 5e-5 --grad-accumulation-steps 4 --max-seq-length 4608 \
     --adapter-path training/adapters --grad-checkpoint --max-grad-norm 1.0
-python app.py
+python app.py                                # Gradio app
 ```
 
-No API key required, everything runs locally except a `claude -p` call
-for course-photo extraction and generation (uses your Claude
-subscription, not a metered API).
+`setup_ocr.sh` installs Tesseract. Everything runs locally except the `claude -p` calls for course extraction and generation, which use a Claude subscription rather than a metered API.
+
+## Repo layout
+
+| Path | What it is |
+|---|---|
+| `app.py` | Gradio app: photo, brief, plan, verification, text-to-speech |
+| `src/verifier.py` | The six deterministic plan checks |
+| `src/copilot.py` | Prompt assembly, identical for teacher and student |
+| `src/` | Shared toolkit: llm, vision, guardrails, context, cache, schemas |
+| `scripts/gen_scenarios.py` | Resumable scenario generator (teacher plus verifier) |
+| `scripts/make_example_courses.py` | Hand-built `CourseProfile` fixtures (6 archetypes) |
+| `training/prep_scenarios.py` | Scenario-id split with a leakage check |
+| `training/lora_harness/train_clipped.py` | `mlx_lm.lora` loop plus gradient clipping |
+| `training/bench_copilot.py` | Three-way benchmark and blind pairwise judge |
+| `tests/test_verifier.py` | Verifier tests |
+| `eval/` | Benchmark, judge outputs, loss curves, dataset card |
+
+## Limitations
+
+- No held-out student plan passed every check, so the local model isn't usable on its own yet.
+- Test scenarios use the same six synthetic course profiles as training; real photographed maps and unseen course shapes aren't benchmarked.
+- The LLM judge is Claude, which is also the teacher.
+- Archived raw outputs in `eval/raw_outputs_*.json` were truncated at 4,000 characters when saved. Scoring ran on the full text, so the metrics stand.
 
 ## License
 
-MIT, see [`LICENSE`](LICENSE).
+[MIT](LICENSE) © 2026 Jeremy Lee

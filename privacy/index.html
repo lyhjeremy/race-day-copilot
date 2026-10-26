@@ -5,22 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Privacy: Race Day Copilot</title>
 <meta name="description" content="What this project collects and what it does not." />
-<meta name="theme-color" content="#EDEDE7" />
+<meta name="theme-color" content="#ECEBE6" />
+<link rel="stylesheet" href="../assets/family.css" />
 <style>
-@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-400.woff2")format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"Source Serif 4";src:url("../fonts/SourceSerif4-600.woff2")format("woff2");font-weight:600;font-display:swap}
-@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-400.woff2")format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"IBM Plex Sans";src:url("../fonts/IBMPlexSans-600.woff2")format("woff2");font-weight:600;font-display:swap}
-:root{--paper:#EDEDE7;--panel:#F5F5F0;--ink:#1C1E1B;--ink-2:#52564E;--rule:#C6C7BF;--edge:#767A70;--signal:#8C3A1E;
---fh:"Source Serif 4","Iowan Old Style","Palatino Linotype",Palatino,serif;
---fb:"IBM Plex Sans","Helvetica Neue",Helvetica,Arial,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#191B18;--panel:#212420;--ink:#E6E6DE;--ink-2:#A2A69B;--rule:#3B3F38;--edge:#6A6F66;--signal:#D8825C}}
+:root{--fh:var(--font-display);--fb:var(--font-body)}
 *,*::before,*::after{box-sizing:border-box;border-radius:0}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.6}
 .wrap{max-width:68ch;margin:0 auto;padding:64px 24px 96px}
-h1,h2{font-family:var(--fh);font-weight:600;line-height:1.15;margin:0 0 16px}
-h1{font-size:2.44rem}
-h2{font-size:1.56rem;margin-top:40px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+h1,h2{font-family:var(--fh);font-weight:700;line-height:1;margin:0 0 16px;text-transform:uppercase}
+h1{font-size:3.2rem}body{border-top:6px solid var(--signal-2)}
+h2{font-size:1.9rem;margin-top:40px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
 p,ul{margin:0 0 16px}
 li{margin-bottom:4px}
 a{color:var(--signal);text-underline-offset:1px}
