@@ -1,6 +1,6 @@
 # Race day copilot
 
-Photograph a race course map and get a km-by-km pacing plan that passes six deterministic checks before you see it, plus a LoRA fine-tune of Qwen2.5-3B distilled from Claude to do the same job locally.
+Photograph a race course map and you get a km-by-km pacing plan that has already passed six deterministic checks. The repo also has a LoRA fine-tune of Qwen2.5-3B, distilled from Claude, that tries to do the same job locally.
 
 [Live site](https://lyhjeremy.github.io/race-day-copilot/) · [Write-up](https://lyhjeremy.github.io/race-day-copilot/overview/) · [Long-form notes](writeup.md) · [Benchmark](eval/benchmark.md)
 
@@ -8,7 +8,7 @@ Design and copy follow [these standards](https://github.com/lyhjeremy/lyhjeremy/
 
 ## Results
 
-70 held-out scenarios, split by scenario id (seed 42, 90/5/5), zero-shot with no retries, the same prompt for all three systems:
+All three systems saw the same prompt on 70 held-out scenarios (split by scenario id, seed 42, 90/5/5), zero-shot with no retries:
 
 | System | Parse success | Passes all checks | Latency (s/plan) |
 |---|---|---|---|
@@ -16,7 +16,7 @@ Design and copy follow [these standards](https://github.com/lyhjeremy/lyhjeremy/
 | Qwen2.5-3B + LoRA (this project) | 95.7% | 0.0% | 53.7 |
 | Claude teacher, zero-shot | 90.0% | 75.7% | 157.7 |
 
-The LoRA student learned the format: it fails coverage on 2.9% of plans, plausibility on 1.4%, heat on 4.3% and citations on none. It fails on arithmetic: 82.9% of its plans miss the goal by more than 90 seconds, and 91.4% report a `fade_allowance_pct` that doesn't match their own splits. In 60 blind, position-swapped LLM-judge comparisons, the teacher was preferred 93.3% of the time, the student 0%, with 6.7% ties. Full per-check table in [`eval/benchmark.md`](eval/benchmark.md).
+The LoRA student learned the format (it fails coverage on 2.9% of plans, plausibility on 1.4%, heat on 4.3% and citations on none) and did not learn the arithmetic: 82.9% of its plans miss the goal by more than 90 seconds, and 91.4% report a `fade_allowance_pct` that doesn't match their own splits. In 60 blind, position-swapped LLM-judge comparisons, the teacher was preferred 93.3% of the time, the student 0%, with 6.7% ties. The full per-check table is in [`eval/benchmark.md`](eval/benchmark.md).
 
 <p align="center">
   <img src="eval/loss_curve.png" alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." width="600">
@@ -24,7 +24,7 @@ The LoRA student learned the format: it fails coverage on 2.9% of plans, plausib
 
 ## How it works
 
-1. **Vision.** `src/vision.py` runs Tesseract OCR on the photo, then `claude -p` parses the text into a `CourseProfile` (distance, hill segments with trend and severity, confidence). Non-course photos get a refusal. No vision API key.
+1. **Vision.** `src/vision.py` runs Tesseract OCR on the photo, then `claude -p` parses the text into a `CourseProfile` (distance, hill segments with trend and severity, confidence). Photos that aren't course maps get a refusal, and no vision API key is involved.
 2. **Retrieval.** 14 knowledge cards of pacing research plus findings digests, embedded locally with sentence-transformers.
 3. **Context engineering.** A priority-based `ContextBudgeter` packs the course, runner brief and retrieved cards into a token budget and reports each section's allocation (`ContextBudgeter.pack().report`). Teacher and student get the identical assembled prompt.
 4. **Generation.** Claude or the local LoRA model returns a Pydantic `PacingPlan`: per-km paces, predicted finish, fade allowance, heat adjustment, cautions, citations.
@@ -41,7 +41,7 @@ Earlier versions of this README counted five checks; the citation rule is the si
 
 ## Training notes
 
-It took four attempts over two days. The planned sequence length (1,536) was 2.7 times shorter than the longest real example (4,197 tokens, measured with the Qwen tokenizer). Without gradient checkpointing the 16 GB Mac ran out of memory and training printed `Train loss 0.000` and `Trained Tokens 0` instead of crashing. Loss then diverged three times, including once with a custom training loop (`training/lora_harness/train_clipped.py`) that adds gradient clipping, which `mlx_lm.lora`'s CLI doesn't expose; gradient norms stayed at 0.18 to 0.35, so clipping never engaged. The published adapter is the best checkpoint, about 400 clean iterations at validation loss 0.226. The untested next hypothesis is the constant learning rate. Details in [`writeup.md`](writeup.md).
+Training took four attempts over two days. The planned sequence length (1,536) was 2.7 times shorter than the longest training example (4,197 tokens, measured with the Qwen tokenizer). Without gradient checkpointing the 16 GB Mac ran out of memory and training printed `Train loss 0.000` and `Trained Tokens 0` instead of crashing. Loss then diverged three times, including once with a custom training loop (`training/lora_harness/train_clipped.py`) that adds gradient clipping, which `mlx_lm.lora`'s CLI doesn't expose; gradient norms stayed at 0.18 to 0.35, so clipping never engaged. The published adapter is the best checkpoint, about 400 clean iterations at validation loss 0.226. My untested next hypothesis is the constant learning rate; [`writeup.md`](writeup.md) has the details.
 
 ## Stack
 
@@ -61,7 +61,7 @@ python training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-I
 python app.py                                # Gradio app
 ```
 
-`setup_ocr.sh` installs Tesseract. Everything runs locally except the `claude -p` calls for course extraction and generation, which use a Claude subscription rather than a metered API.
+`setup_ocr.sh` installs Tesseract. Everything runs locally except the `claude -p` calls for course extraction and generation, which run on a Claude subscription with no metered API.
 
 ## Repo layout
 
@@ -82,7 +82,7 @@ python app.py                                # Gradio app
 ## Limitations
 
 - No held-out student plan passed every check, so the local model isn't usable on its own yet.
-- Test scenarios use the same six synthetic course profiles as training; real photographed maps and unseen course shapes aren't benchmarked.
+- Test scenarios use the same six synthetic course profiles as training; photographed maps and unseen course shapes aren't benchmarked.
 - The LLM judge is Claude, which is also the teacher.
 - Archived raw outputs in `eval/raw_outputs_*.json` were truncated at 4,000 characters when saved. Scoring ran on the full text, so the metrics stand.
 

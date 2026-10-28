@@ -276,7 +276,7 @@
       plain-English sentence. I also distilled the task into a 4-bit Qwen2.5-3B
       with LoRA, trained on a laptop from 1,321 verifier-passed teacher plans. On
       70 held-out scenarios the student formats almost every plan correctly and
-      fails on arithmetic.
+      then gets the arithmetic wrong.
     </p>
 
     <div class="cta-row">
@@ -329,7 +329,7 @@
       <div><dt>03 Plausibility</dt><dd>No split more than 12% slower than the mean pace, or 20% on a steep climb; on a downhill no split more than 20% faster.</dd></div>
       <div><dt>04 Fade</dt><dd>Second half 0 to 8% slower than the first. A negative split is allowed only with a caution citing the 2.5% base rate. The plan's <code>fade_allowance_pct</code> must match its own splits within 0.5 points.</dd></div>
       <div><dt>05 Heat</dt><dd>At 18&deg;C or above, the per-km heat adjustment must fall between 0.75 and 4.5 seconds per degree over 15&deg;C, a band derived from my Boston heat-tax finding of about 1 minute per &deg;F.</dd></div>
-      <div><dt>06 Citations</dt><dd>At least one citation, and only ids that were actually retrieved.</dd></div>
+      <div><dt>06 Citations</dt><dd>At least one citation, and only ids that were retrieved for that prompt.</dd></div>
     </dl>
     <p style="margin-top:22px">
       Earlier descriptions of this project counted five checks. The citation rule
@@ -342,9 +342,9 @@
     <p class="eyebrow">The benchmark</p>
     <h2>Base against LoRA against teacher</h2>
     <p>
-      70 held-out scenarios, split by scenario id (seed 42, 90/5/5), zero-shot
-      with no retries, identical prompts for all three systems. From
-      <code>eval/benchmark.md</code>.
+      All three systems ran zero-shot, with no retries and identical prompts, on
+      70 held-out scenarios split by scenario id (seed 42, 90/5/5). The numbers
+      come from <code>eval/benchmark.md</code>.
     </p>
     <div class="tablewrap" role="region" aria-label="Benchmark of three systems" tabindex="0">
       <table class="sheet">
@@ -374,8 +374,8 @@
     <p class="sheet-note">Base plans fail at parse or coverage, so the verifier returns early and the later checks never run on them; their 0.0% there means "not reached".</p>
     <p style="margin-top:22px">
       The LoRA student is close to the teacher on structure, coverage, hill
-      plausibility, heat and citations. It fails on the two checks that need exact
-      arithmetic across 42 numbers. A typical student plan misses the goal by 430
+      plausibility, heat and citations; where it falls down is the two checks that
+      need exact arithmetic across 42 numbers. A typical student plan misses the goal by 430
       to 730 seconds, and its <code>fade_allowance_pct</code> often disagrees with
       its own splits in sign, for example reporting 4.5 while the splits compute
       &minus;5.1%. In a blind, position-swapped LLM-judge comparison on 60 pairs,
@@ -395,9 +395,9 @@
       gradient checkpointing.
     </p>
     <dl class="specs">
-      <div class="spec"><dt>Sequence length</dt><dd>The planned 1,536 tokens was too short. The longest real example measured 4,197 tokens with the Qwen tokenizer, so the budget became 4,608, asserted before training.</dd></div>
+      <div class="spec"><dt>Sequence length</dt><dd>The planned 1,536 tokens was too short. The longest training example measured 4,197 tokens with the Qwen tokenizer, so the budget became 4,608, asserted before training.</dd></div>
       <div class="spec"><dt>Silent failure</dt><dd>Without gradient checkpointing, memory overflowed and training printed "Train loss 0.000, Trained Tokens 0" every report instead of crashing. A 10-iteration repro confirmed it; checkpointing brought peak memory to about 13 GB.</dd></div>
-      <div class="spec"><dt>Divergence</dt><dd>Loss fell from 1.666 to 0.256, then climbed to 1.651 around iteration 280. Halving the learning rate and adding accumulation delayed it but didn't stop it.</dd></div>
+      <div class="spec"><dt>Divergence</dt><dd>Loss fell from 1.666 to 0.256 over 280 iterations, then climbed to 1.651 within three reports. Halving the learning rate and adding accumulation delayed it but didn't stop it.</dd></div>
       <div class="spec"><dt>Clipping</dt><dd><code>train_clipped.py</code> reuses <code>mlx_lm.lora</code>'s loop and adds <code>clip_grad_norm</code>, since the CLI has no clipping flag. It diverged again; gradient norms stayed at 0.18 to 0.35, under the 1.0 threshold, so clipping never engaged.</dd></div>
       <div class="spec"><dt>Decision</dt><dd>Ship the best checkpoint, about 400 clean iterations at validation loss 0.226, and leave the next hypothesis (a constant learning rate with no decay) for later.</dd></div>
     </dl>
@@ -421,7 +421,7 @@
     </p>
     <p>
       The 70 test scenarios come from the same six synthetic course profiles as
-      the training data, so the benchmark doesn't test unseen course shapes or real
+      the training data, so the benchmark doesn't test unseen course shapes or
       photographed maps. The LLM judge is Claude, which is also the teacher. And the
       archived raw outputs in <code>eval/raw_outputs_*.json</code> were truncated at
       4,000 characters when saved; scoring ran on the full text before truncation,

@@ -97,9 +97,9 @@
     <div class="res"><span class="sys">Qwen2.5-3B base<small>no fine-tune, 17.5 s per plan</small></span><span class="v">55.7%<small>parse</small></span><span class="v">0.0%<small>pass all</small></span></div>
   </div>
   <p style="margin-top:16px">Fine-tuning taught the student the format: parse success went from 55.7% to 95.7%, and it fails
-  coverage, plausibility and heat on under 5% of plans. It fails on arithmetic. 82.9% of its plans miss the goal by
-  more than 90 seconds, and 91.4% report a fade that doesn't match their own splits. Split by scenario id, zero-shot,
-  no retries, same prompt for all three.</p>
+  coverage, plausibility and heat on under 5% of plans. Where it falls down is arithmetic: 82.9% of its plans miss the goal by
+  more than 90 seconds, and 91.4% report a fade that doesn't match their own splits. (Test set split by scenario id; all three
+  systems ran zero-shot with no retries on the same prompt.)</p>
 
   <h2>The six checks</h2>
   <ul class="rules">
@@ -108,7 +108,7 @@
     <li><b>Plausibility</b><span>Each split within its segment's allowance.</span></li>
     <li><b>Fade</b><span>0 to 8% slower in the second half, or a flagged negative split citing the 2.5% base rate.</span></li>
     <li><b>Heat</b><span>At 18&deg;C and up, an adjustment band derived from my Boston heat-tax finding.</span></li>
-    <li><b>Citations</b><span>Only ids that were actually retrieved.</span></li>
+    <li><b>Citations</b><span>At least one, and only ids retrieved for that prompt.</span></li>
   </ul>
 
   <h2>Training took four attempts</h2>
