@@ -16,7 +16,7 @@ All three systems saw the same prompt on 70 held-out scenarios (split by scenari
 | Qwen2.5-3B + LoRA (this project) | 95.7% | 0.0% | 53.7 |
 | Claude teacher, zero-shot | 90.0% | 75.7% | 157.7 |
 
-The LoRA student learned the format (it fails coverage on 2.9% of plans, plausibility on 1.4%, heat on 4.3% and citations on none) and did not learn the arithmetic: 82.9% of its plans miss the goal by more than 90 seconds, and 91.4% report a `fade_allowance_pct` that doesn't match their own splits. In 60 blind, position-swapped LLM-judge comparisons, the teacher was preferred 93.3% of the time, the student 0%, with 6.7% ties. The full per-check table is in [`eval/benchmark.md`](eval/benchmark.md).
+The LoRA student learned the format (it fails coverage on 2.9% of plans, plausibility on 1.4%, heat on 4.3% and citations on none) and did not learn the arithmetic: 82.9% of its plans miss the goal by more than 90 seconds, and 91.4% report a `fade_allowance_pct` that doesn't match their own splits. In 60 blind, position-swapped LLM-judge comparisons, the teacher was preferred 93.3% of the time, the student 0%, with 6.7% ties. The full per-check table is in [`eval/benchmark.md`](eval/benchmark.md). The [write-up page](https://lyhjeremy.github.io/race-day-copilot/overview/) lays the teacher's and the student's archived plans over each other for 31 held-out scenarios, which shows the student's cumulative times drifting away from the goal.
 
 <p align="center">
   <img src="eval/loss_curve.png" alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." width="600">

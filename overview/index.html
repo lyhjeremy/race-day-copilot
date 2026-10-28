@@ -257,6 +257,46 @@
 </style>
 </head>
 <body>
+<style>
+  .viz { margin-top: 30px; border: 1px solid var(--edge); background: var(--card); padding: 18px 18px 14px; font-family: var(--sans); }
+  .viz h3 { font: 600 clamp(22px, 2.6vw, 28px)/1.06 var(--display); text-transform: uppercase; letter-spacing: .01em;
+            margin: 0 0 6px; max-width: 34ch; }
+  .viz .sub { font-size: 14.5px; color: var(--muted); margin: 0 0 16px; max-width: 64ch; line-height: 1.5; }
+  .ctl { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .ctl button, .pick button { font: 600 12.5px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 9px 11px;
+                background: var(--paper); color: var(--ink); border: 1px solid var(--edge); cursor: pointer; }
+  .ctl button:hover, .pick button:hover { border-color: var(--ink); }
+  .ctl button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .readout { font: 400 14px/1.5 var(--mono); color: var(--ink); min-height: 3em; border-top: 1px solid var(--rule);
+             padding-top: 10px; margin: 10px 0 0; }
+  .vsrc { font-size: 13px; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ckrow { display: grid; grid-template-columns: 7.4rem minmax(0, 1fr) 4rem; gap: 10px; align-items: center;
+           padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .ckrow:last-child { border-bottom: 0; }
+  .ckrow .nm { font: 600 19px/1 var(--display); text-transform: uppercase; letter-spacing: .02em; }
+  .ckrow .tk { position: relative; height: 18px; border-left: 1px solid var(--ink); }
+  .ckrow .bar { position: absolute; left: 0; top: 2px; bottom: 2px; background: var(--accent2); }
+  .ckrow .tick { position: absolute; top: -4px; bottom: -4px; border-left: 3px solid var(--accent); }
+  .ckrow .v { font: 400 14px/1 var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 0 0 12px; }
+  .pick select { font: 400 14px/1.2 var(--mono); color: var(--ink); background: var(--paper); border: 1px solid var(--edge);
+                 padding: 7px 8px; min-width: 0; flex: 1 1 14rem; max-width: 100%; }
+  .host { position: relative; }
+  .host svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .t-ax { font: 400 11px var(--mono); fill: var(--muted); }
+  .t-g { font: 600 12px var(--mono); fill: var(--ink); paint-order: stroke; stroke: var(--card); stroke-width: 4px; }
+  .g-grid { stroke: var(--rule); stroke-width: 1; }
+  .g-goal { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .g-t { fill: none; stroke: var(--accent); stroke-width: 3; }
+  .g-l { fill: none; stroke: var(--accent2); stroke-width: 3; stroke-dasharray: 1 0; }
+  .lgd { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--ink2); margin: 8px 0 0; }
+  .lgd span::before { content: ""; display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--accent); margin-right: 7px; vertical-align: 4px; }
+  .lgd .l::before { border-top-color: var(--accent2); }
+  .lgd .g::before { border-top: 2px dashed var(--ink); }
+  @media (max-width: 520px) { .viz { padding: 14px 12px 12px; } .pick select { flex-basis: 100%; order: -1; } .pick button { flex: 1; } .ckrow { grid-template-columns: 6.2rem minmax(0, 1fr) 3.6rem; } .ckrow .nm { font-size: 17px; } }
+</style>
+
 <div class="wrap">
   <header class="masthead">
     <div class="logo"><span class="dot" aria-hidden="true"></span>Race day copilot</div>
@@ -356,22 +396,20 @@
         </tbody>
       </table>
     </div>
-    <p style="margin-top:24px">The pass rate alone hides where the student fails. Share of plans failing each check:</p>
-    <div class="tablewrap" role="region" aria-label="Per-check violation rates" tabindex="0">
-      <table class="sheet">
-        <thead><tr><th>Check</th><th class="num">Base</th><th class="num">LoRA</th><th class="num">Teacher</th></tr></thead>
-        <tbody>
-          <tr><td>Parse</td><td class="num bad">44.3%</td><td class="num">4.3%</td><td class="num">10.0%</td></tr>
-          <tr><td>Coverage</td><td class="num bad">55.7%</td><td class="num">2.9%</td><td class="num">0.0%</td></tr>
-          <tr><td>Sum</td><td class="num">0.0%</td><td class="num bad">82.9%</td><td class="num">2.9%</td></tr>
-          <tr><td>Plausibility</td><td class="num">0.0%</td><td class="num">1.4%</td><td class="num">0.0%</td></tr>
-          <tr><td>Fade</td><td class="num">0.0%</td><td class="num bad">91.4%</td><td class="num">5.7%</td></tr>
-          <tr><td>Heat</td><td class="num">0.0%</td><td class="num">4.3%</td><td class="num">0.0%</td></tr>
-          <tr><td>Citations</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">8.6%</td></tr>
-        </tbody>
-      </table>
+    <p style="margin-top:24px">The pass rate alone hides where the student fails.</p>
+    <div class="viz" id="chk">
+      <h3 id="chk-title">The LoRA student fails on arithmetic: sum 82.9%, fade 91.4%</h3>
+      <p class="sub">Share of the 70 held-out plans failing each check. Bars show the selected system; the tick is the Claude teacher.</p>
+      <div class="ctl" role="group" aria-label="Choose a system">
+        <button type="button" data-s="base" aria-pressed="false">Qwen base</button>
+        <button type="button" data-s="lora" aria-pressed="true">Qwen + LoRA</button>
+        <button type="button" data-s="teacher" aria-pressed="false">Claude teacher</button>
+      </div>
+      <div id="chk-rows"></div>
+      <p class="readout" id="chk-out" aria-live="polite"></p>
+      <p class="vsrc">From <code>eval/benchmark_raw.json</code> (<code>violation_rates</code>). Base plans fail at parse or coverage, so
+        the verifier returns early and the later checks never run on them; a zero there means "not reached".</p>
     </div>
-    <p class="sheet-note">Base plans fail at parse or coverage, so the verifier returns early and the later checks never run on them; their 0.0% there means "not reached".</p>
     <p style="margin-top:22px">
       The LoRA student is close to the teacher on structure, coverage, hill
       plausibility, heat and citations; where it falls down is the two checks that
@@ -381,6 +419,32 @@
       &minus;5.1%. In a blind, position-swapped LLM-judge comparison on 60 pairs,
       the teacher was preferred 93.3% of the time, the student never, with 6.7% ties.
     </p>
+  </section>
+
+  <section class="stop">
+    <p class="eyebrow">Two plans, one scenario</p>
+    <h2>Where the student's arithmetic goes wrong</h2>
+    <p>
+      The archived outputs keep each plan's cumulative time per km, so the teacher's and the student's plans
+      for the same held-out scenario can be laid over each other. A plan on target reaches the goal time at
+      the finish. Pick a scenario; the default is one where the student is far off.
+    </p>
+    <div class="viz" id="strip">
+      <h3 id="strip-title">Cumulative time by km, teacher against student</h3>
+      <p class="sub">The goal is the time named in the teacher's strategy summary. Lines stop where the archive was cut at 4,000 characters, not where the plans ended.</p>
+      <div class="pick">
+        <button type="button" id="strip-prev" aria-label="Previous scenario">Prev</button>
+        <label for="strip-sel" class="vh">Scenario</label>
+        <select id="strip-sel"></select>
+        <button type="button" id="strip-next" aria-label="Next scenario">Next</button>
+      </div>
+      <div class="host" id="strip-host" role="img" aria-label="Cumulative time against km for the teacher's and the student's plans in the selected scenario, with the goal time as a dashed line."></div>
+      <div class="lgd" aria-hidden="true"><span class="t">Claude teacher</span><span class="l">Qwen + LoRA student</span><span class="g">Goal</span></div>
+      <p class="readout" id="strip-out" aria-live="polite"></p>
+      <p class="vsrc">Parsed from <code>eval/raw_outputs_teacher.json</code> and <code>eval/raw_outputs_lora.json</code> (the <code>cumulative</code>
+        field of each split) for the 31 held-out scenarios where the teacher's summary names a goal and both archives keep at least 20 splits.
+        Judge verdicts from <code>eval/judge_outputs.json</code>.</p>
+    </div>
   </section>
 
   <section class="stop">
@@ -403,7 +467,7 @@
     </dl>
     <figure>
       <div class="plate">
-        <img width="1050" height="600" src="../eval/loss_curve.png" loading="lazy"
+        <img src="../eval/loss_curve.png" loading="lazy"
           alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." />
       </div>
       <figcaption>Loss for the published checkpoint. The divergence runs are in <code>eval/loss_curve_divergence_incident.png</code> and <code>training/*.log</code>.</figcaption>
@@ -472,5 +536,95 @@
     <p>Pacing guidance, not medical advice.</p>
   </footer>
 </div>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  function el(n, a, txt) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+
+  /* ---- per-check violation rates: eval/benchmark_raw.json ---- */
+  var CHECKS = ["parse", "coverage", "sum", "plausibility", "fade", "heat", "citations"];
+  var V = {
+    base: { coverage: 0.557, parse: 0.443 },
+    lora: { sum: 0.829, fade: 0.914, plausibility: 0.014, parse: 0.043, heat: 0.043, coverage: 0.029 },
+    teacher: { parse: 0.1, sum: 0.029, fade: 0.057, citations: 0.086 }
+  };
+  var PASS = { base: 0.0, lora: 0.0, teacher: 0.757 }, NAME = { base: "Qwen base", lora: "Qwen + LoRA", teacher: "Claude teacher" };
+  var sys = "lora", rows = document.getElementById("chk-rows"), cOut = document.getElementById("chk-out");
+  function pc(x) { return (x * 100).toFixed(1) + "%"; }
+  function drawChk() {
+    var html = "";
+    CHECKS.forEach(function (c) {
+      var v = V[sys][c] || 0, t = V.teacher[c] || 0;
+      html += '<div class="ckrow"><span class="nm">' + c + '</span><span class="tk" aria-hidden="true"><span class="bar" style="width:' + (v * 100).toFixed(1) + '%"></span>'
+        + (sys !== "teacher" ? '<span class="tick" style="left:' + (t * 100).toFixed(1) + '%"></span>' : "") + '</span><span class="v">' + pc(v) + '</span></div>';
+    });
+    rows.innerHTML = html;
+    var worst = CHECKS.slice().sort(function (a, b) { return (V[sys][b] || 0) - (V[sys][a] || 0); });
+    document.getElementById("chk-title").textContent = {
+      base: "The base model fails on format: parse 44.3%, coverage 55.7%",
+      lora: "The LoRA student fails on arithmetic: sum 82.9%, fade 91.4%",
+      teacher: "The teacher's misses are spread thin: none above 10%"
+    }[sys];
+    cOut.textContent = NAME[sys] + ": " + pc(PASS[sys]) + " of plans pass every check. Most failed: " + worst[0] + " (" + pc(V[sys][worst[0]] || 0) + "), then "
+      + worst[1] + " (" + pc(V[sys][worst[1]] || 0) + ").";
+    [].slice.call(document.querySelectorAll("#chk .ctl button")).forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.s === sys ? "true" : "false"); });
+  }
+  [].slice.call(document.querySelectorAll("#chk .ctl button")).forEach(function (b) {
+    b.addEventListener("click", function () { sys = b.dataset.s; drawChk(); });
+  });
+  drawChk();
+
+  /* ---- teacher against student, cumulative time per km ---- */
+  /* [item_id, goal named in teacher summary, teacher cumulative s per km, LoRA cumulative s per km, judge verdict] */
+  var S = [["fb63839f7ffc8489","3:15:00",[288,576,864,1152,1440,1728,2016,2304,2592,2880,3168,3456,3744,4032,4320,4608,4896,5184,5472,5760,6048,6314,6580,6846,7112,7378,7644,7910,8176,8442,8708,8974,9240,9506,9772,10038],[270,540,810,1080,1350,1620,1890,2160,2430,2700,2970,3240,3510,3780,4050,4320,4590,4860,5130,5400,5670,5920,6170,6420,6670,6920,7170,7420,7670,7920,8170,8420,8670,8920,9170,9420,9670,9920],"teacher"],["9af8bcc977e11216","3:15:00",[288,576,864,1151,1438,1725,2012,2299,2586,2873,3160,3447,3734,4021,4308,4595,4882,5169,5456,5743,6030,6306,6571,6836,7101,7366,7631,7896,8161,8426,8691,8956,9221],[295,590,885,1180,1475,1770,2065,2360,2655,2950,3245,3540,3835,4130,4425,4720,5015,5310,5605,5900,6195,6535,6815,7095,7375,7655,7935,8215,8495,8775,9055,9335,9615,9895,10175,10455,10735,11015,11295,11575],"teacher"],["f57f58df9d290b30","4:30:00",[409,818,1227,1636,2045,2454,2863,3272,3681,4090,4499,4908,5317,5726,6135,6544,6953,7362,7771,8180,8589,8948,9307,9666,10025,10384,10743,11102,11461,11820,12179],[410,820,1230,1640,2050,2460,2870,3280,3690,4100,4510,4920,5330,5740,6150,6560,6970,7380,7790,8200,8610,9040,9410,9780,10150,10520,10890,11260,11630,12000,12370,12740,13110,13480,13850,14220,14590,14960,15330],"teacher"],["6d7f61c2598710fc","4:45:00",[417,834,1251,1668,2085,2502,2919,3336,3753,4170,4587,5004,5421,5838,6255,6672,7089,7506,7923,8340,8757,9150,9543,9936,10329,10722,11115,11508,11901,12294,12687,13080,13473,13866],[390,780,1170,1560,1950,2340,2730,3120,3510,3900,4290,4680,5070,5460,5850,6240,6630,7020,7410,7800,8190,8630,9010,9390,9770,10150,10530,10910,11290,11670,12050,12430,12810,13190,13570,13950,14330,14710,15090,15470,15850],"teacher"],["152147e6b65d53ac","5:15:00",[468,936,1404,1872,2340,2808,3276,3744,4212,4680,5148,5616,6084,6552,7020,7488,7956,8424,8892,9360,9828,10260,10688,11116,11544,11972,12400,12828,13256,13684],[430,860,1290,1720,2150,2580,3010,3440,3870,4300,4730,5160,5590,6020,6450,6880,7310,7740,8170,8600,9030,9430,9830,10230,10630,11030,11430,11830,12230,12630,13030,13430,13830,14230,14630,15030,15430,15830,16230],"teacher"],["d344cda922185b2d","5:15:00",[470,932,1387,1837,2287,2737,3187,3637,4087,4537,4987,5437,5887,6337,6787,7237,7687,8139,8594,9052,9512,9952,10384,10812,11237,11660,12082,12504,12929,13357,13792,14234],[435,870,1305,1740,2175,2610,3045,3480,3915,4350,4785,5220,5655,6090,6525,6960,7395,7830,8265,8700,9135,9480,9885,10290,10695,11100,11505,11910,12315,12720,13125,13530,13935,14340,14745,15150,15555,15960],"tie"],["05256125a421776c","5:45:00",[498,996,1494,1992,2490,2988,3486,3984,4482,4980,5478,5976,6474,6972,7470,7968,8466,8964,9462,9960,10458,10941,11424,11907,12390,12873,13356,13839,14322,14805,15288,15771],[495,990,1485,1980,2475,2970,3465,3960,4455,4950,5445,5940,6435,6930,7425,7920,8415,8910,9405,9900,10395,10830,11265,11700,12135,12570,13005,13440,13875,14310,14745,15180,15615,16050,16485,16920,17355,17790,18225,18660,19095],"teacher"],["0fd16b2e80194a6f","5:45:00",[500,1000,1500,2000,2500,3000,3500,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,9500,10000,10500,10981,11462,11943,12424,12905,13386,13867,14348,14829,15310,15791],[490,980,1470,1960,2450,2940,3430,3920,4410,4900,5390,5880,6370,6860,7350,7840,8330,8820,9310,9800,10290,10770,11250,11730,12210,12690,13170,13650,14130,14610,15090,15570,16050,16530,17010,17490,17970,18450,18930],"teacher"],["8436722c5a531e24","3:30:00",[298,596,894,1192,1490,1779,2068,2357,2646,2935,3224,3513,3802,4091,4380,4669,4964,5259,5554,5849,6144,6439,6734,7029,7324,7619,7934,8249,8564,8879,9194,9509,9824,10139],[290,580,870,1160,1450,1740,2030,2320,2610,2900,3190,3480,3770,4060,4350,4640,4930,5220,5510,5800,6090,6380,6670,6960,7250,7540,7850,8160,8470,8780,9090,9400,9710,10020,10310,10600,10890,11180],"teacher"],["67c4983e1603b085","4:15:00",[358,716,1074,1432,1790,2148,2506,2864,3222,3580,3938,4296,4654,5012,5370,5728,6091,6454,6817,7180,7543,7906,8269,8632,8995,9358,9753,10148,10543,10938,11333,11728],[370,740,1110,1480,1850,2220,2590,2960,3330,3700,4070,4440,4810,5180,5550,5920,6290,6660,7030,7400,7770,8140,8510,8880,9250,9620,10010,10400,10790,11180,11570,11960,12350,12740,13110,13480,13850,14220],"teacher"],["a101314aba390361","4:15:00",[352,704,1056,1408,1760,2112,2464,2816,3168,3520,3872,4224,4576,4928,5280,5632,5990,6348,6706,7064,7422,7780,8138,8496,8854,9212,9605,9998,10391,10784,11177,11570],[370,740,1110,1480,1850,2220,2590,2960,3330,3700,4070,4440,4810,5180,5550,5920,6290,6660,7030,7400,7770,8140,8510,8880,9250,9620,9990,10360,10730,11100,11470,11840,12210,12580,12990,13400,13810,14220,14630],"teacher"],["5daefa62517428aa","4:30:00",[372,744,1116,1488,1860,2232,2604,2976,3348,3720,4092,4464,4836,5208,5580,5952,6336,6720,7104,7488,7872,8256,8640,9024,9408,9792,10216,10640,11064,11488,11912,12336,12760],[370,740,1110,1480,1850,2220,2590,2960,3330,3700,4070,4440,4810,5180,5550,5920,6290,6660,7030,7400,7770,8140,8510,8880,9250,9620,10010,10400,10790,11180,11570,11960,12350,12740,13110,13480],"teacher"],["b772396ce458aa52","5:30:00",[454,908,1362,1816,2270,2724,3178,3632,4086,4540,4994,5448,5902,6356,6810,7264,7736,8208,8680,9152,9624,10096,10568,11040,11512,11984,12488,12992,13496,14000,14504,15008,15512],[430,860,1290,1720,2150,2580,3010,3440,3870,4300,4730,5160,5590,6020,6450,6880,7310,7740,8170,8600,9030,9460,9890,10320,10750,11180,11610,12040,12470,12900,13330,13760,14190,14620,15110,15600,16090,16580],"teacher"],["e1bcabbc4e2e9579","2:45:00",[227,456,686,917,1149,1381,1614,1847,2079,2310,2537,2761,2984,3206,3427,3648,3870,4093,4317,4538,4768,5004,5246,5492,5740,5990,6240],[250,500,750,1000,1250,1500,1750,2000,2250,2500,2750,3000,3250,3500,3750,4000,4250,4500,4750,5000,5250,5500,5750,6000,6250,6500,6750,7000,7250,7500,7750,8000,8250,8500,8750,9000,9250,9500,9750,10000,10250],"teacher"],["3fda026124fd8494","3:45:00",[326,652,978,1304,1630,1956,2282,2608,2934,3260,3570,3880,4190,4500,4810,5120,5430,5740,6050,6360,6693,7026,7359,7692,8025,8358,8691,9024,9357,9690],[315,630,945,1260,1575,1890,2205,2520,2835,3150,3465,3780,4095,4410,4725,5040,5355,5670,5985,6300,6615,6930,7245,7560,7875,8190,8505,8820,9135,9450,9765,10080,10395,10710,11025,11340,11655,11970,12285],"teacher"],["b04cfe9dec9f4cf9","3:45:00",[328,656,984,1312,1640,1968,2296,2624,2952,3280,3592,3904,4216,4528,4840,5152,5464,5776,6088,6400,6735,7070,7405,7740,8075,8410,8745,9080,9415,9750,10062],[310,620,930,1240,1550,1920,2230,2540,2850,3120,3430,3740,4050,4360,4670,4980,5290,5600,5910,6220,6530,6840,7150,7460,7770,8080,8390,8700,9010,9320,9630,9940,10250,10560,10870,11180,11490,11800,12110,12420],"teacher"],["869cddbc3f5ebca3","4:15:00",[346,693,1041,1390,1740,2091,2443,2796,3150,3505,3853,4202,4552,4903,5255,5608,5962,6317,6673,7030,7399,7769,8140,8512,8885,9259,9634,10010,10387,10765,11131],[370,740,1110,1480,1850,2220,2590,2960,3330,3700,4070,4440,4810,5180,5550,5920,6290,6660,7030,7400,7770,8140,8510,8880,9250,9620,9990,10360,10730,11100,11470,11840,12210,12580,12950,13320,13690,14060,14430,14800],"teacher"],["aca4d48aa83c94b6","5:15:00",[435,870,1305,1740,2175,2610,3045,3480,3915,4350,4775,5200,5625,6050,6475,6900,7325,7750,8175,8600,9055,9510,9965,10420,10875,11330,11785,12240,12695,13150,13621,14092,14563,15034,15505,15976],[430,860,1290,1720,2150,2580,3010,3440,3870,4300,4730,5160,5590,6020,6450,6880,7310,7740,8170,8600,9030,9460,9890,10320,10750,11180,11610,12040,12470,12900,13330,13760,14190,14620,15050,15480,15910,16340,16770,17200,17630,18060],"teacher"],["63d8fc86864c2789","5:15:00",[440,880,1320,1760,2200,2640,3080,3520,3960,4400,4828,5256,5684,6112,6540,6968,7396,7824,8252,8680,9132,9606,10080,10554,11028,11502,11976,12450,12924,13398],[435,870,1305,1740,2175,2610,3045,3480,3915,4350,4790,5230,5670,6110,6550,6990,7430,7870,8310,8750,9190,9630,10070,10510,10950,11390,11830,12270,12710,13150,13590,14030,14470,14910,15350,15790,16230,16670,17110,17550,17990],"teacher"],["ed0d2c895b220946","2:45:00",[226,452,678,905,1132,1360,1588,1817,2046,2276,2506,2736,2967,3198,3430,3662,3895,4128,4361,4595,4829,5064,5299,5535,5771,6008,6245,6482,6720,6958,7197,7436,7676,7916,8156,8397,8638,8880],[400,800,1200,1600,2000,2400,2800,3200,3600,4000,4400,4800,5200,5600,6000,6400,6800,7200,7600,8000,8400,8800,9200,9600,10000,10400,10800,11200,11600,12000,12400,12800,13200,13600,14000,14400,14800,15200,15600,16000,16400],"teacher"],["6465f63b292517c6","2:45:00",[228,456,684,912,1140,1368,1596,1824,2052,2280,2512,2744,2976,3208,3440,3672,3904,4136,4368,4600,4832,5068,5304,5540,5776,6012,6248,6484,6720,6956,7192,7432],[135,270,405,540,675,810,905,1040,1175,1310,1445,1580,1715,1850,1925,2060,2195,2330,2465,2600,2740,2880,3020,3120,3260,3400,3540,3680,3780,3920,4060,4200,4340,4480,4620,4760,4900,5040,5180],"teacher"],["771e9b082b50bb4e","6:00:00",[506,1012,1518,2024,2530,3036,3542,4048,4554,5060,5548,6036,6524,7012,7500,7988,8476,8964,9452,9940,10480,11020,11560,12100,12640,13180,13720,14260,14800,15340],[495,990,1485,1980,2475,2970,3465,3960,4455,4950,5445,5940,6435,6930,7425,7920,8415,8910,9405,9900,10400,10900,11400,11900,12400,12900,13400,13900,14400,14900,15400,15900,16400,16900,17400,17900],"teacher"],["8a97b8f99a588162","2:45:00",[238,476,714,947,1180,1413,1646,1879,2112,2345,2578,2811,3044,3277,3510,3743,3976,4209,4442,4675,4908,5143,5378,5613,5848,6083,6318,6553,6788,7023,7258,7493,7728,7963,8198,8433,8668],[230,460,690,920,1150,1380,1610,1840,2070,2300,2530,2760,2990,3220,3450,3680,3910,4140,4370,4600,4830,5060,5290,5520,5750,5980,6210,6440,6670,6900,7130,7360,7590,7820,8050,8280,8510,8740,8970,9200,9430,9660,9710],"teacher"],["a452aa6666a72f05","3:00:00",[260,518,774,1028,1282,1536,1790,2044,2298,2552,2806,3060,3314,3568,3822,4076,4330,4584,4838,5092,5346,5600,5854,6108,6362,6616,6870,7124,7378,7632,7890,8148,8406,8664,8922,9180,9438,9696,9960],[241,482,723,964,1205,1446,1687,1928,2169,2410,2651,2892,3133,3374,3615,3856,4097,4338,4579,4820,5061,5319,5577,5835,6093,6351,6609,6867,7125,7383,7641,7899,8157,8415,8673,8931,9189,9447,9705,9963,10221,10479,10500],"teacher"],["d8e8337126eabe0c","3:15:00",[290,580,870,1160,1450,1740,2030,2320,2610,2900,3198,3496,3794,4092,4390,4688,4986,5284,5582,5880,6178,6486,6794,7102,7410,7718,8026,8334,8642,8950,9258,9566,9886,10206,10526,10846,11166],[270,540,810,1080,1350,1620,1890,2160,2430,2700,2970,3240,3510,3780,4050,4320,4590,4860,5130,5400,5670,5940,6210,6480,6750,7020,7290,7560,7830,8100,8370,8640,8910,9180,9450,9720,9990,10260,10530],"tie"],["339b2f35623eeabc","3:45:00",[313,626,939,1252,1565,1878,2191,2504,2817,3130,3443,3756,4069,4382,4701,5020,5339,5658,5977,6296,6615,6934,7253,7572,7891,8210,8529,8848,9176,9504,9832,10160,10488],[310,620,930,1240,1550,1860,2170,2480,2790,3100,3410,3720,4030,4340,4650,4960,5270,5580,5890,6200,6510,6820,7130,7440,7750,8060,8370,8680,8990,9300,9610,9920,10230,10540,10850,11160,11470,11780,12090,12400,12710,13020],""],["456b453b275086b4","4:30:00",[374,748,1122,1496,1870,2244,2618,2992,3366,3740,4114,4488,4862,5236,5610,5984,6358,6732,7106,7480,7854,8247,8640,9033,9426,9819,10212,10605,10998,11391,11784,12177,12570,12963],[370,740,1110,1480,1850,2220,2590,2960,3330,3700,4070,4440,4810,5180,5550,5920,6290,6660,7030,7400,7770,8140,8510,8880,9250,9620,9990,10360,10730,11100,11470,11840,12210,12580,12950,13320,13690,14060,14430,14800,15170,15540,15606],""],["9b2641e9eec42307","4:45:00",[397,794,1191,1588,1985,2382,2779,3176,3573,3970,4367,4764,5161,5558,5955,6352,6749,7146,7543,7940,8337,8750,9163,9576,9989,10402,10815,11228,11641,12054,12467,12880,13293,13706,14119,14532,14945,15358,15771,16184],[400,800,1140,1540,1940,2340,2740,3140,4140,4540,4940,5340,5740,6140,6540,6940,7340,7740,8140,8540,8940,9350,9760,10170,10580,10990,11400,11810,12220,12630,13040,13450,13860,14270,14680,15090,15500,15910,16320,16730],""],["fa08f695356f3221","5:15:00",[434,868,1302,1736,2170,2608,3046,3484,3922,4360,4802,5244,5686,6128,6570,7014,7458,7902,8346,8790,9238,9686,10134,10582,11030,11482,11934,12386,12838,13290,13746,14202,14658,15114,15570],[440,880,1320,1760,2200,2640,3080,3520,3960,4400,4840,5280,5720,6160,6600,7040,7480,7920,8360,8800,9240,9680,10120,10560,11000,11440,11880,12320,12760,13200,13640,14080,14520,14960,15400,15840,16280,16720,17160,17600,18040,18480,18890],""],["7d0195b0e8f66e69","5:30:00",[460,920,1380,1840,2300,2760,3220,3680,4140,4600,5060,5520,5980,6440,6900,7360,7820,8280,8740,9200,9660,10138,10616,11094,11572,12050,12528,13006,13484,13962,14440,14918,15396,15874,16352,16830,17308,17786,18264],[460,920,1380,1840,2300,2760,3220,3680,4140,4600,5060,5520,5980,6440,6900,7360,7820,8280,8740,9200,9660,10130,10600,11070,11540,12010,12480,12950,13420,13890,14360,14830,15300,15770,16240,16710,17180,17650,18120,18590,19060,19530,19570],""],["95531b28764d3b75","1:35:00",[268,536,804,1072,1340,1608,1876,2144,2412,2680,2948,3220,3492,3764,4036,4308,4580,4852,5124,5396,5668,5695],[295,590,885,1180,1475,1770,2065,2360,2655,2950,3245,3540,3835,4130,4425,4720,5015,5310,5605,5900,6195,6494,6793,7092,7391,7690,7989,8288,8587,8886,9185,9484,9783,10082,10321,10560,10859,11158,11457,11756,12055],""]];
+  var sel = document.getElementById("strip-sel"), host = document.getElementById("strip-host"), sOut = document.getElementById("strip-out");
+  function sec(g) { var p = g.split(":").map(Number); return p[0] * 3600 + p[1] * 60 + p[2]; }
+  function hms(s) { s = Math.round(s); var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h + ":" + (m < 10 ? "0" : "") + m + ":" + (x < 10 ? "0" : "") + x; }
+  S.forEach(function (r, i) {
+    var o = document.createElement("option"); o.value = i;
+    o.textContent = "Goal " + r[1] + " · " + r[0];
+    sel.appendChild(o);
+  });
+  var cur = 0; S.forEach(function (r, i) { if (r[0] === "ed0d2c895b220946") cur = i; });
+  sel.value = cur;
+  function drawStrip() {
+    var r = S[cur], Wd = host.clientWidth; if (!Wd) return;
+    var narrow = Wd < 560, L = 44, R = narrow ? 64 : 80, top = 14, H = narrow ? 240 : 300, base = H - 24;
+    var goal = sec(r[1]), maxS = Math.max(goal, r[2][r[2].length - 1], r[3][r[3].length - 1]) * 1.06;
+    var step = maxS > 4 * 3600 ? 3600 : 1800, pw = Wd - L - R;
+    function X(k) { return L + k / 43 * pw; }
+    function Y(s) { return base - s / maxS * (base - top); }
+    var svg = el("svg", { viewBox: "0 0 " + Wd + " " + H, width: Wd, height: H, "aria-hidden": "true" });
+    for (var t = 0; t <= maxS; t += step) {
+      svg.appendChild(el("line", { x1: L, x2: L + pw, y1: Y(t), y2: Y(t), "class": "g-grid" }));
+      svg.appendChild(el("text", { x: L - 6, y: Y(t) + 4, "text-anchor": "end", "class": "t-ax" }, Math.floor(t / 3600) + ":" + (t % 3600 ? "30" : "00")));
+    }
+    [0, 10, 20, 30, 40].forEach(function (k) { svg.appendChild(el("text", { x: X(k), y: H - 6, "text-anchor": "middle", "class": "t-ax" }, k + (k === 40 ? " km" : ""))); });
+    svg.appendChild(el("line", { x1: L, x2: L + pw, y1: Y(goal), y2: Y(goal), "class": "g-goal" }));
+    svg.appendChild(el("text", { x: L + 4, y: Y(goal) - 6, "class": "t-g" }, "goal " + r[1]));
+    [[r[2], "g-t", "teacher"], [r[3], "g-l", "student"]].forEach(function (s) {
+      var d = "M" + X(0) + " " + Y(0) + s[0].map(function (c, i) { return " L" + X(i + 1).toFixed(1) + " " + Y(c).toFixed(1); }).join("");
+      svg.appendChild(el("path", { d: d, "class": s[1] }));
+      var n = s[0].length;
+      svg.appendChild(el("text", { x: X(n) + 6, y: Y(s[0][n - 1]) + 4, "class": "t-g" }, s[2]));
+    });
+    host.innerHTML = ""; host.appendChild(svg);
+    var nt = r[2].length, nl = r[3].length, k = Math.min(nt, nl);
+    var gap = r[3][k - 1] - r[2][k - 1];
+    sOut.textContent = "Teacher's archive ends at km " + nt + " (" + hms(r[2][nt - 1]) + "); student's at km " + nl + " (" + hms(r[3][nl - 1]) + "). At km " + k
+      + " the student is " + hms(Math.abs(gap)) + (gap >= 0 ? " behind" : " ahead of") + " the teacher."
+      + (r[4] ? " Judge preferred: " + (r[4] === "tie" ? "neither (tie)" : r[4]) + "." : " Not in the judged 60.");
+  }
+  function go(i) { cur = (i + S.length) % S.length; sel.value = cur; drawStrip(); }
+  sel.addEventListener("change", function () { go(+sel.value); });
+  document.getElementById("strip-prev").addEventListener("click", function () { go(cur - 1); });
+  document.getElementById("strip-next").addEventListener("click", function () { go(cur + 1); });
+  drawStrip();
+  var last = host.clientWidth;
+  var f = function () { if (host.clientWidth !== last) { last = host.clientWidth; drawStrip(); } };
+  if (window.ResizeObserver) new ResizeObserver(f).observe(host); else window.addEventListener("resize", f);
+})();
+</script>
 </body>
 </html>
