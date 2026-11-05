@@ -299,6 +299,15 @@
   .lgd .l::before { border-top-color: var(--accent2); }
   .lgd .g::before { border-top: 2px dashed var(--ink); }
   @media (max-width: 520px) { .viz { padding: 14px 12px 12px; } .pick select { flex-basis: 100%; order: -1; } .pick button { flex: 1; } .ckrow { grid-template-columns: 6.2rem minmax(0, 1fr) 3.6rem; } .ckrow .nm { font-size: 17px; } }
+  /* At a glance */
+  .glance { margin-top: 30px; border: 1px solid var(--edge); background: var(--card); padding: 16px 18px 6px; font-family: var(--sans); }
+  .glance h2 { font: 600 clamp(20px, 2.2vw, 24px)/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; margin: 0 0 8px; max-width: none; }
+  .glance dl { margin: 0; }
+  .glance dl > div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 2px 16px; padding: 9px 0; border-top: 1px solid var(--rule); }
+  .glance dt { font: 600 17px/1.25 var(--display); text-transform: uppercase; letter-spacing: .02em; color: var(--ink); }
+  .glance dd { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2); }
+  .glance dd b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+  @media (max-width: 560px) { .glance { padding: 14px 12px 6px; } .glance dl > div { grid-template-columns: 1fr; } }
 </style>
 
 <div class="wrap">
@@ -346,6 +355,19 @@
         <p>of teacher generations accepted while building the training set: 1,458 of 1,519 attempts.</p>
       </div>
     </div>
+
+    <section class="glance" aria-labelledby="glance-h">
+      <h2 id="glance-h">At a glance</h2>
+      <dl>
+        <div><dt>Task</dt><dd>Write a km-by-km pacing plan for a course and goal that passes six checks in code</dd></div>
+        <div><dt>Eval set</dt><dd>70 held-out scenarios, split by scenario id (seed 42, 90/5/5) with a leakage check; every system ran on all 70</dd></div>
+        <div><dt>Baseline</dt><dd>Claude teacher, zero-shot: <b>75.7%</b> of plans pass every check. Base Qwen2.5-3B: 55.7% parse, 0.0% pass</dd></div>
+        <div><dt>Result</dt><dd>LoRA student: <b>95.7%</b> parse, <b>0.0%</b> pass every check. A blind judge preferred the teacher on 56 of 60 pairs, with 4 ties</dd></div>
+        <div><dt>Cost per plan</dt><dd>$0 per call on the laptop; the teacher ran on a Max subscription and its per-call cost was not recorded</dd></div>
+        <div><dt>Latency</dt><dd>Means only: 53.7 s per plan for the student (model reloaded every call), 157.7 s for the teacher. Per-plan times were not saved, so there is no median or p95</dd></div>
+        <div><dt>Main failure</dt><dd>Arithmetic: 82.9% of student plans miss the 90-second sum tolerance and 91.4% fail the fade check</dd></div>
+      </dl>
+    </section>
   </section>
 </div>
 
@@ -471,7 +493,7 @@
     </dl>
     <figure>
       <div class="plate">
-        <img src="../eval/loss_curve.png" loading="lazy"
+        <img width="1050" height="600" src="../eval/loss_curve.png" loading="lazy"
           alt="Training and validation loss for the published LoRA model over 400 iterations; validation loss falls from about 1.67 to about 0.23 by iteration 100 and stays flat." />
       </div>
       <figcaption>Loss for the published checkpoint. The divergence runs are in <code>eval/loss_curve_divergence_incident.png</code> and <code>training/*.log</code>.</figcaption>
