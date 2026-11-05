@@ -1,0 +1,5 @@
+# Only what the offline tests need (python -m pytest -q tests).
+# The full requirements.txt pulls in the model stack, mlx included,
+# which the tests do not import.
+pydantic>=2.0
+pytest>=8.0
