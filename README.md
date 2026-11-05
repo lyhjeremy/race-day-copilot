@@ -1,5 +1,7 @@
 # Race day copilot
 
+[![tests](https://github.com/lyhjeremy/race-day-copilot/actions/workflows/tests.yml/badge.svg)](https://github.com/lyhjeremy/race-day-copilot/actions/workflows/tests.yml)
+
 Photograph a race course map and you get a km-by-km pacing plan that has already passed six deterministic checks. The repo also has a LoRA fine-tune of Qwen2.5-3B, distilled from Claude, that tries to do the same job locally.
 
 [Live site](https://lyhjeremy.github.io/race-day-copilot/) · [Write-up](https://lyhjeremy.github.io/race-day-copilot/overview/) · [Long-form notes](writeup.md) · [Benchmark](eval/benchmark.md)
