@@ -52,8 +52,12 @@ Python, Tesseract (pytesseract), Claude CLI, sentence-transformers, Pydantic, ML
 ## How to run
 
 ```bash
+git clone https://github.com/lyhjeremy/race-day-copilot && cd race-day-copilot
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+./setup_ocr.sh                               # tesseract and language packs, one time (Homebrew)
 python scripts/make_example_courses.py       # 6 course fixtures (committed)
+python scripts/ingest.py                     # knowledge cards into the local Chroma index
 python scripts/gen_scenarios.py              # scenario generation (long-running, resumable)
 python training/prep_scenarios.py            # scenario-id split train/valid/test
 python training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-Instruct-4bit \
@@ -63,7 +67,7 @@ python training/lora_harness/train_clipped.py --model mlx-community/Qwen2.5-3B-I
 python app.py                                # Gradio app
 ```
 
-`setup_ocr.sh` installs Tesseract. Everything runs locally except the `claude -p` calls for course extraction and generation, which run on a Claude subscription with no metered API.
+Everything runs locally except the `claude -p` calls for course extraction and generation, which run on a Claude subscription with no metered API.
 
 The Claude teacher costs $0.117 a plan ($117.47 per 1,000) at API prices: the `total_cost_usd` that `claude -p --output-format json` reports, measured on 2026-11-05 by rerunning the first 20 held-out scenarios with the benchmark's own prompt and flags (Sonnet 5.5; script and per-call rows in [`eval/claude_cost/`](eval/claude_cost/)). Nothing was billed. In that rerun the teacher took 37.6 s median per plan and 15 of 20 plans passed every check.
 
