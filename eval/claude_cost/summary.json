@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-05",
+  "machine": "Apple M4, macOS 26.5.2",
+  "percentile_method": "nearest rank",
+  "n": 20,
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "cost_per_item_usd_median": 0.1166,
+  "cost_per_item_usd_mean": 0.1175,
+  "cost_per_1000_items_usd": 117.47,
+  "latency_median_s": 37.62,
+  "latency_p95_s": 45.09,
+  "cost_note": "total_cost_usd from claude -p --output-format json: the API-equivalent cost; the CLI runs on a Max subscription, so nothing was billed",
+  "task": "write a per-km race pacing plan for one course and runner brief",
+  "sample": "first 20 of the 70 held-out scenarios",
+  "cli_args": "-p --model sonnet --output-format json",
+  "cwd": "repo root",
+  "parsed": 20,
+  "verifier_pass": 15
+}

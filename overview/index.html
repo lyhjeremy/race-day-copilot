@@ -363,7 +363,7 @@
         <div><dt>Eval set</dt><dd>70 held-out scenarios, split by scenario id (seed 42, 90/5/5) with a leakage check; every system ran on all 70</dd></div>
         <div><dt>Baseline</dt><dd>Claude teacher, zero-shot: <b>75.7%</b> of plans pass every check. Base Qwen2.5-3B: 55.7% parse, 0.0% pass</dd></div>
         <div><dt>Result</dt><dd>LoRA student: <b>95.7%</b> parse, <b>0.0%</b> pass every check. A blind judge preferred the teacher on 56 of 60 pairs, with 4 ties</dd></div>
-        <div><dt>Cost per plan</dt><dd>$0 per call on the laptop; the teacher ran on a Max subscription and its per-call cost was not recorded</dd></div>
+        <div><dt>Cost per plan</dt><dd>$0 per call on the laptop; the Claude teacher <b>$0.117</b> API-equivalent ($117.47 per 1,000), from 20 held-out scenarios rerun on 2026-11-05 with the benchmark's prompt and CLI flags (<code>eval/claude_cost/</code>)</dd></div>
         <div><dt>Latency</dt><dd>Means only: 53.7 s per plan for the student (model reloaded every call), 157.7 s for the teacher. Per-plan times were not saved, so there is no median or p95</dd></div>
         <div><dt>Main failure</dt><dd>Arithmetic: 82.9% of student plans miss the 90-second sum tolerance and 91.4% fail the fade check</dd></div>
       </dl>
